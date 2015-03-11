@@ -41,8 +41,9 @@ namespace BitDB_Server
                     MaxConnections =  1000000,
                     MaxBufferSize = 1024*10,
                     MaxReceivedMessageSize = 1024*10,
+                    PortSharingEnabled = true
                 };
-                Host = new ServiceHost(typeof (BitDB), new Uri("net.tcp://" + Core.GetIP()+ ":809"));
+                Host = new ServiceHost(typeof (BitDB), new Uri("net.tcp://79.133.51.71"));
                 Host.AddServiceEndpoint(typeof (IBitDB), Binding, "BitDB");
                 Host.Faulted += (sender, args) => { Console.WriteLine("Much crash wow"); };
                 Host.Closed += (sender, args) => { Console.WriteLine("Much disconnect wow"); };

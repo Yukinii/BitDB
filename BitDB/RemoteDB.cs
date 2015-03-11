@@ -7,7 +7,7 @@ namespace BitDB
     {
         private bool _authenticated;
         private static readonly NetTcpBinding Binding = new NetTcpBinding(SecurityMode.None);
-        private static readonly EndpointAddress Endpoint = new EndpointAddress("net.tcp://" + Core.GetIP() + /*+ "46.75.150.198" +*/ "/BitDB");
+        private static readonly EndpointAddress Endpoint = new EndpointAddress("net.tcp://79.133.51.71/BitDB");
         private static readonly ChannelFactory<IBitDB> Factory = new ChannelFactory<IBitDB>(Binding, Endpoint);
         private IBitDB _remoteDB;
         private string _username;
