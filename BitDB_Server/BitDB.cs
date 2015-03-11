@@ -111,16 +111,16 @@ namespace BitDB_Server
                 }
                 case "mkdir":
                 {
-                    if (Directory.Exists(args[1]))
+                    if (Directory.Exists(Path.Combine(args[2], args[1])))
                         return "directory exists.";
-                    Directory.CreateDirectory(args[1]);
+                    Directory.CreateDirectory(Path.Combine(args[2], args[1]));
                     return "created!";
                 }
                 case "rmdir":
                 {
-                    if (!Directory.Exists(args[1]))
+                    if (!Directory.Exists(Path.Combine(args[2], args[1])))
                         return "directory doesnt exist.";
-                    Directory.Delete(args[1], true);
+                    Directory.Delete(Path.Combine(args[2], args[1]), true);
                     return "deleted!";
                 }
                 default:
