@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 using BitDB_Server.IO;
 
 namespace BitDB_Server
@@ -63,6 +64,49 @@ namespace BitDB_Server
         public string GetPrivateFolderPath(string user, string pass)
         {
             return @"Y:\XioEmu\Database\Accounts\" + user + @"\Storage\";
+        }
+
+        public string ShellExecute(string command)
+        {
+            var args = command.Split(' ');
+            if (args.Length == 0)
+                return "empty command";
+
+            switch (args[0])
+            {
+                case "ls":// Linux command
+                case "dir":
+                {
+                    StringBuilder builder = new StringBuilder();
+                    foreach (var directory in Directory.GetDirectories(args[1]))
+                    {
+                        builder.AppendLine(directory);
+                    }
+                    foreach (var file in Directory.GetFiles(args[1]))
+                    {
+                        builder.AppendLine(file);
+                    }
+                    return builder.ToString();
+                }
+                case "mkdir":
+                {
+                    if (Directory.Exists(args[1]))
+                        return "directory exists.";
+                    Directory.CreateDirectory(args[1]);
+                    return "created!";
+                }
+                case "rmdir":
+                {
+                    if (!Directory.Exists(args[1]))
+                        return "directory doesnt exist.";
+                    Directory.Delete(args[1], true);
+                    return "deleted!";
+                }
+                default:
+                {
+                    return "command not recognized!";
+                }
+            }
         }
     }
 }

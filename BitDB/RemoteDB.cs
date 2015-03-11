@@ -74,5 +74,12 @@ namespace BitDB
                 return _remoteDB.GetPrivateFolderPath(user, pass);
             throw new UnauthorizedAccessException("Call Authenticate(username, pass) first!");
         }
+
+        public string ShellExecute(string command)
+        {
+            if (_authenticated)
+                return _remoteDB.ShellExecute(command + " " + _workingDirectory);
+            throw new UnauthorizedAccessException("Call Authenticate(username, pass) first!");
+        }
     }
 }

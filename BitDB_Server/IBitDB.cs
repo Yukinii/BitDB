@@ -26,5 +26,8 @@ namespace BitDB_Server
         [OperationContract]
         string GetPrivateFolderPath(string user, string pass);
 
+        [OperationContract]
+        string ShellExecute(string command);
+
     }
 }
