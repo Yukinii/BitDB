@@ -92,9 +92,9 @@ namespace BitDB_Server
                         {
                             var info = new FileInfo(file);
                             size += info.Length;
-                                builder.AppendLine(string.Format("{0} {1} {2} {3}", info.CreationTime.ToShortDateString().PadRight(10), info.CreationTime.ToShortTimeString().PadRight(8), ((info.Length / 1024) + "kb").PadRight(8), file.Replace(args[1], "")));
+                            builder.AppendLine(string.Format("{0} {1} {2} {3}", info.CreationTime.ToShortDateString().PadRight(10), info.CreationTime.ToShortTimeString().PadRight(8), ((info.Length/1024) + "kb").PadRight(8), file.Replace(args[1], "")));
                         }
-                            builder.AppendLine(files.Length + " File(s) \t " + size / 1024 + "kbs");
+                        builder.AppendLine(files.Length + " File(s) \t " + size/1024 + "kbs");
                         builder.AppendLine(dirs.Length + " Dir(s) \t ");
                         return builder.ToString();
                     }
@@ -108,6 +108,13 @@ namespace BitDB_Server
                     if (args[1] != "..")
                         return Directory.Exists(Path.Combine(args[2], args[1])) ? Path.Combine(args[2], args[1]) : "not found";
                     return Directory.GetParent(args[2]).FullName.Contains(@"\Storage") ? Directory.GetParent(args[2]).FullName : "not found";
+                }
+                case "rm":
+                {
+                    if (!File.Exists(Path.Combine(args[2], args[1])))
+                            return "not found!";
+                    File.Delete(Path.Combine(args[2], args[1]));
+                    return "deleted!";
                 }
                 case "mkdir":
                 {
