@@ -92,9 +92,9 @@ namespace BitDB_Server
                         {
                             var info = new FileInfo(file);
                             size += info.Length;
-                            builder.AppendLine(string.Format("{0} {1} {2} {3}", info.CreationTime.ToShortDateString().PadRight(10), info.CreationTime.ToShortTimeString().PadRight(8), ((info.Length/1024) + "kb").PadRight(8), file.Replace(args[1], "")));
+                                builder.AppendLine(string.Format("{0} {1} {2} {3}", info.CreationTime.ToShortDateString().PadRight(10), info.CreationTime.ToShortTimeString().PadRight(8), ((info.Length / 1024) + "kb").PadRight(8), file.Replace(args[1], "")));
                         }
-                        builder.AppendLine(files.Length + " File(s) \t " + size/1024 + "kbs");
+                            builder.AppendLine(files.Length + " File(s) \t " + size / 1024 + "kbs");
                         builder.AppendLine(dirs.Length + " Dir(s) \t ");
                         return builder.ToString();
                     }
@@ -105,13 +105,15 @@ namespace BitDB_Server
                 }
                 case "cd":
                 {
-                    if (args[1] == "..")
-                    {
-                        string last = args[2].Substring(args[2].LastIndexOf('\\') + 1);
-                        if (last.Contains(@"\Storage\"))
-                            return last;
-                    }
-                    return Directory.Exists(args[2] + args[1]) ? args[2] + args[1] : "not found";
+                        if (args[1] == "..")
+                        {
+                            var last = Directory.GetParent(args[2]).FullName;
+                            if (last.Contains(@"\Storage"))
+                                return last;
+                            else
+                                return "not found";
+                        }
+                        return Directory.Exists(Path.Combine(args[2], args[1])) ? Path.Combine(args[2], args[1]) : "not found";
                 }
                 case "mkdir":
                 {
