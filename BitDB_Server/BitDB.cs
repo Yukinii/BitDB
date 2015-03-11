@@ -83,13 +83,13 @@ namespace BitDB_Server
                         foreach (var directory in Directory.GetDirectories(args[1]))
                         {
                             var info = new DirectoryInfo(directory);
-                            builder.AppendFormat("{0,-10} {1,-10} {2, 5} {3,30}", info.CreationTime.ToShortDateString(), info.CreationTime.ToShortTimeString(), "<DIR>", directory.Replace(args[1], ""));
+                            builder.AppendLine(string.Format("{0} {1} {2} {3}", info.CreationTime.ToShortDateString().PadRight(10), info.CreationTime.ToShortTimeString().PadRight(5), "<DIR>".PadRight(5), directory.Replace(args[1], "")));
                         }
                         foreach (var file in Directory.GetFiles(args[1]))
                         {
                             var info = new FileInfo(file);
-                            builder.AppendFormat("{0,-10} {1,-10} {2, 5} {3,30}", info.CreationTime.ToShortDateString(), info.CreationTime.ToShortTimeString(), info.Length, file.Replace(args[1], ""));
-                        }
+                                builder.AppendLine(string.Format("{0} {1} {2} {3}", info.CreationTime.ToShortDateString().PadRight(10), info.CreationTime.ToShortTimeString().PadRight(8), ((info.Length / 1024) + "kb").PadRight(8), file.Replace(args[1], "")));
+                            }
                         return builder.ToString();
                     }
                     catch
