@@ -42,7 +42,7 @@ namespace BitDB_Server
                     MaxBufferSize = 1024*10,
                     MaxReceivedMessageSize = 1024*10,
                 };
-                Host = new ServiceHost(typeof (BitDB), new Uri("net.tcp://" + Core.GetIP()));
+                Host = new ServiceHost(typeof (BitDB), new Uri("net.tcp://" + Core.GetIP()+ ":809"));
                 Host.AddServiceEndpoint(typeof (IBitDB), Binding, "BitDB");
                 Host.Faulted += (sender, args) => { Console.WriteLine("Much crash wow"); };
                 Host.Closed += (sender, args) => { Console.WriteLine("Much disconnect wow"); };
