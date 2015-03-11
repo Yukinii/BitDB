@@ -76,43 +76,45 @@ namespace BitDB_Server
             {
                 case "ls":// Linux command
                 case "dir":
-                    {
+                {
                         try
                         {
                             StringBuilder builder = new StringBuilder();
-                            foreach (var directory in Directory.GetDirectories(args[1]))
-                            {
-                                builder.AppendLine(directory);
-                            }
-                            foreach (var file in Directory.GetFiles(args[1]))
-                            {
-                                builder.AppendLine(file);
-                            }
-                            return builder.ToString();
-                        }
+                    foreach (var directory in Directory.GetDirectories(args[1]))
+                    {
+                        var info = new DirectoryInfo(directory);
+                        builder.AppendLine(info.CreationTime.ToShortDateString() + " "+info.CreationTime.ToShortTimeString()+"  <DIR>   " + directory);
+                    }
+                    foreach (var file in Directory.GetFiles(args[1]))
+                    {
+                        var info = new FileInfo(file);
+                        builder.AppendLine(info.CreationTime.ToShortDateString() + " " + info.CreationTime.ToShortTimeString()+ "       " + info.Length + " " + file);
+                    }
+                    return builder.ToString();
+                }
                         catch
                         {
                             return "access denied!";
                         }
                     }
                 case "mkdir":
-                    {
-                        if (Directory.Exists(args[1]))
-                            return "directory exists.";
-                        Directory.CreateDirectory(args[1]);
-                        return "created!";
-                    }
+                {
+                    if (Directory.Exists(args[1]))
+                        return "directory exists.";
+                    Directory.CreateDirectory(args[1]);
+                    return "created!";
+                }
                 case "rmdir":
-                    {
-                        if (!Directory.Exists(args[1]))
-                            return "directory doesnt exist.";
-                        Directory.Delete(args[1], true);
-                        return "deleted!";
-                    }
+                {
+                    if (!Directory.Exists(args[1]))
+                        return "directory doesnt exist.";
+                    Directory.Delete(args[1], true);
+                    return "deleted!";
+                }
                 default:
-                    {
-                        return "command not recognized!";
-                    }
+                {
+                    return "command not recognized!";
+                }
             }
         }
     }
