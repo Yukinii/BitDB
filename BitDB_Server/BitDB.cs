@@ -77,14 +77,16 @@ namespace BitDB_Server
                 case "ls":// Linux command
                 case "dir":
                 {
-                    StringBuilder builder = new StringBuilder();
+                    var builder = new StringBuilder();
                     foreach (var directory in Directory.GetDirectories(args[1]))
                     {
-                        builder.AppendLine(directory);
+                        var info = new DirectoryInfo(directory);
+                        builder.AppendLine(info.CreationTime.ToShortDateString() + " "+info.CreationTime.ToShortTimeString()+"  <DIR>   " + directory);
                     }
                     foreach (var file in Directory.GetFiles(args[1]))
                     {
-                        builder.AppendLine(file);
+                        var info = new FileInfo(file);
+                        builder.AppendLine(info.CreationTime.ToShortDateString() + " " + info.CreationTime.ToShortTimeString()+ "       " + info.Length + " " + file);
                     }
                     return builder.ToString();
                 }
