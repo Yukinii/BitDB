@@ -74,7 +74,7 @@ namespace BitDB_Server
 
             switch (args[0])
             {
-                case "ls":// Linux command
+                case "ls": // Linux command
                 case "dir":
                 {
                     try
@@ -105,7 +105,13 @@ namespace BitDB_Server
                 }
                 case "cd":
                 {
-                    return Directory.Exists(args[1]) ? args[1] : "not found";
+                    if (args[1] == "..")
+                    {
+                        string last = args[2].Substring(args[2].LastIndexOf('\\') + 1);
+                        if (last.Contains(@"\Storage\"))
+                            return last;
+                    }
+                    return Directory.Exists(args[2] + args[1]) ? args[2] + args[1] : "not found";
                 }
                 case "mkdir":
                 {
