@@ -103,6 +103,10 @@ namespace BitDB_Server
                         return "access denied!";
                     }
                 }
+                case "cd":
+                {
+                    return Directory.Exists(args[1]) ? args[1] : "not found";
+                }
                 case "mkdir":
                 {
                     if (Directory.Exists(args[1]))

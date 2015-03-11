@@ -78,7 +78,15 @@ namespace BitDB
         public string ShellExecute(string command)
         {
             if (_authenticated)
-                return _remoteDB.ShellExecute(command + " " + _workingDirectory);
+            {
+                var response = _remoteDB.ShellExecute(command + " " + _workingDirectory);
+                if (command.StartsWith("cd "))
+                {
+                    if (response != "not found")
+                        _workingDirectory = response;
+                }
+                return response;
+            }
             throw new UnauthorizedAccessException("Call Authenticate(username, pass) first!");
         }
     }
