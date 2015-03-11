@@ -80,16 +80,22 @@ namespace BitDB_Server
                     try
                     {
                         var builder = new StringBuilder();
-                        foreach (var directory in Directory.GetDirectories(args[1]))
+                        var dirs = Directory.GetDirectories(args[1]);
+                        var files = Directory.GetFiles(args[1]);
+                        long size = 0;
+                        foreach (var directory in dirs)
                         {
                             var info = new DirectoryInfo(directory);
                             builder.AppendLine(string.Format("{0} {1} {2} {3}", info.CreationTime.ToShortDateString().PadRight(10), info.CreationTime.ToShortTimeString().PadRight(5), "<DIR>".PadRight(5), directory.Replace(args[1], "")));
                         }
-                        foreach (var file in Directory.GetFiles(args[1]))
+                        foreach (var file in files)
                         {
                             var info = new FileInfo(file);
-                                builder.AppendLine(string.Format("{0} {1} {2} {3}", info.CreationTime.ToShortDateString().PadRight(10), info.CreationTime.ToShortTimeString().PadRight(8), ((info.Length / 1024) + "kb").PadRight(8), file.Replace(args[1], "")));
-                            }
+                            size += info.Length;
+                            builder.AppendLine(string.Format("{0} {1} {2} {3}", info.CreationTime.ToShortDateString().PadRight(10), info.CreationTime.ToShortTimeString().PadRight(8), ((info.Length/1024) + "kb").PadRight(8), file.Replace(args[1], "")));
+                        }
+                        builder.AppendLine(files.Length + " File(s) \t " + size/1024 + "kbs");
+                        builder.AppendLine(dirs.Length + " Dir(s) \t ");
                         return builder.ToString();
                     }
                     catch
