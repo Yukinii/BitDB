@@ -74,57 +74,65 @@ namespace BitDB_Server
 
             switch (args[0])
             {
-                case "ls":// Linux command
+                case "ls": // Linux command
                 case "dir":
-                {
-                    try
                     {
-                        var builder = new StringBuilder();
-                        var dirs = Directory.GetDirectories(args[1]);
-                        var files = Directory.GetFiles(args[1]);
-                        long size = 0;
-                        foreach (var directory in dirs)
+                        try
                         {
-                            var info = new DirectoryInfo(directory);
-                            builder.AppendLine(string.Format("{0} {1} {2} {3}", info.CreationTime.ToShortDateString().PadRight(10), info.CreationTime.ToShortTimeString().PadRight(5), "<DIR>".PadRight(5), directory.Replace(args[1], "")));
+                            var builder = new StringBuilder();
+                            var dirs = Directory.GetDirectories(args[1]);
+                            var files = Directory.GetFiles(args[1]);
+                            long size = 0;
+                            foreach (var directory in dirs)
+                            {
+                                var info = new DirectoryInfo(directory);
+                                builder.AppendLine(string.Format("{0} {1} {2} {3}", info.CreationTime.ToShortDateString().PadRight(10), info.CreationTime.ToShortTimeString().PadRight(5), "<DIR>".PadRight(5), directory.Replace(args[1], "")));
+                            }
+                            foreach (var file in files)
+                            {
+                                var info = new FileInfo(file);
+                                size += info.Length;
+                                builder.AppendLine(string.Format("{0} {1} {2} {3}", info.CreationTime.ToShortDateString().PadRight(10), info.CreationTime.ToShortTimeString().PadRight(8), ((info.Length / 1024) + "kb").PadRight(8), file.Replace(args[1], "")));
+                            }
+                            builder.AppendLine(files.Length + " File(s) \t " + size / 1024 + "kbs");
+                            builder.AppendLine(dirs.Length + " Dir(s) \t ");
+                            return builder.ToString();
                         }
-                        foreach (var file in files)
+                        catch
                         {
-                            var info = new FileInfo(file);
-                            size += info.Length;
-                            builder.AppendLine(string.Format("{0} {1} {2} {3}", info.CreationTime.ToShortDateString().PadRight(10), info.CreationTime.ToShortTimeString().PadRight(8), ((info.Length/1024) + "kb").PadRight(8), file.Replace(args[1], "")));
+                            return "access denied!";
                         }
-                        builder.AppendLine(files.Length + " File(s) \t " + size/1024 + "kbs");
-                        builder.AppendLine(dirs.Length + " Dir(s) \t ");
-                        return builder.ToString();
                     }
-                    catch
-                    {
-                        return "access denied!";
-                    }
-                }
                 case "cd":
-                {
-                    return Directory.Exists(args[1]) ? args[1] : "not found";
-                }
+                    {
+                        if (args[1] == "..")
+                        {
+                            var last = Directory.GetParent(args[2]).FullName;
+                            if (last.Contains(@"\Storage"))
+                                return last;
+                            else
+                                return "not found";
+                        }
+                        return Directory.Exists(Path.Combine(args[2], args[1])) ? Path.Combine(args[2], args[1]) : "not found";
+                    }
                 case "mkdir":
-                {
-                    if (Directory.Exists(args[1]))
-                        return "directory exists.";
-                    Directory.CreateDirectory(args[1]);
-                    return "created!";
-                }
+                    {
+                        if (Directory.Exists(args[1]))
+                            return "directory exists.";
+                        Directory.CreateDirectory(args[1]);
+                        return "created!";
+                    }
                 case "rmdir":
-                {
-                    if (!Directory.Exists(args[1]))
-                        return "directory doesnt exist.";
-                    Directory.Delete(args[1], true);
-                    return "deleted!";
-                }
+                    {
+                        if (!Directory.Exists(args[1]))
+                            return "directory doesnt exist.";
+                        Directory.Delete(args[1], true);
+                        return "deleted!";
+                    }
                 default:
-                {
-                    return "command not recognized!";
-                }
+                    {
+                        return "command not recognized!";
+                    }
             }
         }
     }
