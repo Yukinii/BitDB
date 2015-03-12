@@ -80,7 +80,7 @@ namespace BitDB
         {
             if (_authenticated)
             {
-                var response = await _remoteDB.ShellExecute(command + " " + _workingDirectory);
+                var response =  await _remoteDB.ShellExecute(command + " " + _workingDirectory);
                 if (command.StartsWith("cd "))
                 {
                     if (response != "not found")

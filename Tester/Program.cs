@@ -14,7 +14,7 @@ namespace Tester
                 while (true)
                 {
                     var cmd = Console.ReadLine();
-                    Console.WriteLine(db.ShellExecute(cmd));
+                    Console.WriteLine(db.ShellExecute(cmd).Result);
                 }
             }
             Console.WriteLine("Lol nope.");
