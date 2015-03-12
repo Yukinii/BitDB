@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ServiceModel;
+using System.Threading.Tasks;
 
 namespace BitDB
 {
@@ -75,11 +76,11 @@ namespace BitDB
             throw new UnauthorizedAccessException("Call Authenticate(username, pass) first!");
         }
 
-        public string ShellExecute(string command)
+        public async Task<string> ShellExecute(string command)
         {
             if (_authenticated)
             {
-                var response = _remoteDB.ShellExecute(command + " " + _workingDirectory);
+                var response = await _remoteDB.ShellExecute(command + " " + _workingDirectory);
                 if (command.StartsWith("cd "))
                 {
                     if (response != "not found")

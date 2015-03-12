@@ -1,4 +1,5 @@
 ﻿using System.ServiceModel;
+using System.Threading.Tasks;
 
 namespace BitDB
 {
@@ -27,6 +28,6 @@ namespace BitDB
         string GetPrivateFolderPath(string user, string pass);
 
         [OperationContract]
-        string ShellExecute(string command);
+        Task<string> ShellExecute(string command);
     }
 }

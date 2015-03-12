@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
+using System.Net;
 using System.Text;
+using System.Threading.Tasks;
 using BitDB_Server.IO;
 
 namespace BitDB_Server
@@ -66,7 +68,7 @@ namespace BitDB_Server
             return @"Y:\XioEmu\Database\Accounts\" + user + @"\Storage\";
         }
 
-        public string ShellExecute(string command)
+        public async Task<string> ShellExecute(string command)
         {
             var args = command.Split(' ');
             if (args.Length == 0)
@@ -129,6 +131,17 @@ namespace BitDB_Server
                         return "directory doesnt exist.";
                     Directory.Delete(Path.Combine(args[2], args[1]), true);
                     return "deleted!";
+                }
+                case "wget":
+                {
+                    if (!File.Exists(Path.Combine(args[2], args[1], args[4])))
+                    {
+                        using (var client = new WebClient())
+                        {
+                            File.WriteAllBytes(args[3], await client.DownloadDataTaskAsync(args[3]));
+                        }
+                    }
+                    return "file exists.";
                 }
                 default:
                 {
