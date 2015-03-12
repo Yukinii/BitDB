@@ -156,9 +156,9 @@ namespace BitDB_Server
                     }
                 case "cp":
                 {
-                    if (File.Exists(Path.Combine(args[2], args[1])))
+                    if (File.Exists(Path.Combine(args[3], args[1])))
                     {
-                        File.Copy(Path.Combine(args[2], args[1]), Path.Combine(args[1], args[3]));
+                        File.Copy(Path.Combine(args[3], args[1]), Path.Combine(args[3], args[2]));
                     }
                     return "fail.";
                 }
