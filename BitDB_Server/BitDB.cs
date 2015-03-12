@@ -155,13 +155,14 @@ namespace BitDB_Server
                         return "downloaded.";
                     }
                 case "cp":
-                {
-                    if (File.Exists(Path.Combine(args[3], args[1])))
                     {
-                        File.Copy(Path.Combine(args[3], args[1]), Path.Combine(args[3], args[2]));
+                        if (File.Exists(Path.Combine(args[3], args[1])))
+                        {
+                            File.Copy(Path.Combine(args[3], args[1]), Path.Combine(args[3], args[2]));
+                            return "copied.";
+                        }
+                        return "fail.";
                     }
-                    return "fail.";
-                }
                 default:
                 {
                     return "command not recognized!";
