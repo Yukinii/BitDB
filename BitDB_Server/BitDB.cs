@@ -163,6 +163,28 @@ namespace BitDB_Server
                         }
                         return "fail.";
                     }
+                case "mv":
+                    {
+                        if (File.Exists(Path.Combine(args[3], args[1])))
+                        {
+                            File.Move(Path.Combine(args[3], args[1]), Path.Combine(args[3], args[2]));
+                            return "copied.";
+                        }
+                        return "fail.";
+                    }
+                case "spy":
+                    {
+                        try
+                        {
+                            var builder = new StringBuilder();
+                            builder.Append(File.ReadAllLines(Path.Combine(args[1], args[2])));
+                            return builder.ToString();
+                        }
+                        catch
+                        {
+                            return "file not found";
+                        }
+                    }
                 default:
                 {
                     return "command not recognized!";
