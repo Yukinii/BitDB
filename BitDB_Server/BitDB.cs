@@ -177,7 +177,7 @@ namespace BitDB_Server
                         try
                         {
                             var builder = new StringBuilder();
-                            builder.Append(File.ReadAllLines(Path.Combine(args[1], args[2])));
+                            builder.Append(File.ReadAllLines(Path.Combine(args[2], args[1])));
                             return builder.ToString();
                         }
                         catch
