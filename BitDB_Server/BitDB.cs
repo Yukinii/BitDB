@@ -74,6 +74,7 @@ namespace BitDB_Server
             if (args.Length == 0)
                 return "empty command";
 
+            await Task.Delay(0);
             switch (args[0])
             {
                 case "ls": // Linux command
