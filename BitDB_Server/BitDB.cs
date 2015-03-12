@@ -134,21 +134,25 @@ namespace BitDB_Server
                     return "deleted!";
                 }
                 case "wget":
-                {
-                        try {
-                        if (!File.Exists(Path.Combine(args[3], args[2])))
+                    {
+                        try
                         {
-                            using (var client = new WebClient())
+                            if (!File.Exists(Path.Combine(args[3], args[2])))
                             {
-                                File.WriteAllBytes(Path.Combine(args[3], args[2]), await client.DownloadDataTaskAsync(args[1]));
+                                using (var client = new WebClient())
+                                {
+                                    File.WriteAllBytes(Path.Combine(args[3], args[2]), await client.DownloadDataTaskAsync(args[1]));
+                                }
                             }
-                            } }
-                        catch(Exception Ex)
+                            else
+                                return "file exists.";
+                        }
+                        catch (Exception Ex)
                         {
                             Console.WriteLine(Ex);
                             return Ex.Message;
                         }
-                        return "file exists.";
+                        return "downloaded.";
                     }
                 case "cp":
                 {
