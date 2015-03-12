@@ -135,15 +135,24 @@ namespace BitDB_Server
                 }
                 case "wget":
                 {
-                        if (!File.Exists(Path.Combine(args[3], args[2])))
+                    if (!File.Exists(Path.Combine(args[3], args[2])))
+                    {
+                        using (var client = new WebClient())
                         {
-                            using (var client = new WebClient())
-                            {
-                                File.WriteAllBytes(Path.Combine(args[3], args[2]), await client.DownloadDataTaskAsync(args[1]));
-                            }
+                            File.WriteAllBytes(Path.Combine(args[3], args[2]), await client.DownloadDataTaskAsync(args[1]));
                         }
-                        return "file exists.";
+                        return "download complete";
                     }
+                    return "file exists.";
+                }
+                case "cp":
+                {
+                    if (File.Exists(Path.Combine(args[2], args[1])))
+                    {
+                        File.Copy(Path.Combine(args[2], args[1]), Path.Combine(args[1], args[3]));
+                    }
+                    return "fail.";
+                }
                 default:
                 {
                     return "command not recognized!";

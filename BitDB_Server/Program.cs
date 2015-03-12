@@ -29,12 +29,13 @@ namespace BitDB_Server
             try
             {
                 ServiceSecurity.Mode = SecurityMode.None;
+                
                 Binding = new NetTcpBinding()
                 {
                     Security = ServiceSecurity,
                     ReceiveTimeout = TimeSpan.MaxValue,
                     SendTimeout = TimeSpan.MaxValue,
-                    TransferMode = TransferMode.Buffered,
+                    TransferMode = TransferMode.Streamed,
                     CloseTimeout = TimeSpan.MaxValue,
                     ListenBacklog = 1000,
                     MaxBufferPoolSize = 1024*10,
