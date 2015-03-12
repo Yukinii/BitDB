@@ -35,7 +35,7 @@ namespace BitDB_Server
                     Security = ServiceSecurity,
                     ReceiveTimeout = TimeSpan.MaxValue,
                     SendTimeout = TimeSpan.MaxValue,
-                    TransferMode = TransferMode.Streamed,
+                    TransferMode = TransferMode.Buffered,
                     CloseTimeout = TimeSpan.MaxValue,
                     ListenBacklog = 1000,
                     MaxBufferPoolSize = 1024*10,
