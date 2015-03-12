@@ -139,7 +139,7 @@ namespace BitDB_Server
                         {
                             using (var client = new WebClient())
                             {
-                                File.WriteAllBytes(Path.Combine(args[3], args[2]), await client.DownloadDataTaskAsync(args[3]));
+                                File.WriteAllBytes(Path.Combine(args[3], args[2]), await client.DownloadDataTaskAsync(args[1]));
                             }
                         }
                         return "file exists.";
