@@ -22,9 +22,6 @@ namespace BitDB
         bool CreateFile(string user, string path);
 
         [OperationContract]
-        bool Authenticate(string user, string pass);
-
-        [OperationContract]
         string GetPrivateFolderPath(string user, string pass);
 
         [OperationContract]

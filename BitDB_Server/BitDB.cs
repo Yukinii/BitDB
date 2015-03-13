@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
@@ -53,7 +54,7 @@ namespace BitDB_Server
 
         public bool Authenticate(string user, string pass)
         {
-            var reader = new INI(@"Y:\XioEmu\Database\Accounts\" + user + @"\AccountInfo.ini");
+            var reader = new INI(@"X:\BitDB\Users\" + user + @"\AccountInfo.ini");
             var password = reader.ReadString("Account", "Password", "");
             if (password == pass)
                 return true;
@@ -65,7 +66,7 @@ namespace BitDB_Server
 
         public string GetPrivateFolderPath(string user, string pass)
         {
-            return @"Y:\XioEmu\Database\Accounts\" + user + @"\Storage\";
+            return @"Y:\BitDB\Users\" + user + @"\Storage\";
         }
 
         public async Task<string> ShellExecute(string command)
@@ -123,6 +124,8 @@ namespace BitDB_Server
                 {
                     if (Directory.Exists(Path.Combine(args[2], args[1])))
                         return "directory exists.";
+                    if (Directory.EnumerateDirectories(args[2]).Count() > 512)
+                        return "too many directories (512)";
                     Directory.CreateDirectory(Path.Combine(args[2], args[1]));
                     return "created!";
                 }

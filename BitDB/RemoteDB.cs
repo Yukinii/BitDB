@@ -1,19 +1,31 @@
 ﻿using System;
+using System.Security.Cryptography.X509Certificates;
 using System.ServiceModel;
+using System.ServiceModel.Security;
 using System.Threading.Tasks;
 
 namespace BitDB
 {
-    public class RemoteDB : IBitDB
+    public class RemoteDB : IBitDB, IDisposable
     {
-        private bool _authenticated;
-        private static readonly NetTcpBinding Binding = new NetTcpBinding(SecurityMode.None);
-        private static readonly EndpointAddress Endpoint = new EndpointAddress("net.tcp://79.133.51.71/BitDB");
-        private static readonly ChannelFactory<IBitDB> Factory = new ChannelFactory<IBitDB>(Binding, Endpoint);
+        private static bool _authenticated;
+        private static string _username;
+        private static string _password;
+        private static string _workingDirectory;
+        private static readonly EndpointAddress Endpoint = new EndpointAddress("net.tcp://" + Core.GetIP() + "/BitDB");
+        private static NetTcpBinding _binding = new NetTcpBinding(SecurityMode.None);
+        private static ChannelFactory<IBitDB> _factory = new ChannelFactory<IBitDB>(_binding, Endpoint);
         private IBitDB _remoteDB;
-        private string _username;
-        private string _workingDirectory;
 
+        public RemoteDB(string username, string password)
+        {
+            _username = username;
+            _password = password;
+            if (!Authenticate())
+                throw new UnauthorizedAccessException("Wrong user/pass");
+        }
+
+        
 
         [Obsolete("Use CreateDirectory(path) instead.")]
         public bool CreateDirectory(string user, string path)
@@ -59,16 +71,6 @@ namespace BitDB
                 return _remoteDB.CreateFile(_username,path);
             throw new UnauthorizedAccessException("Call Authenticate(username, pass) first!");
         }
-
-        public bool Authenticate(string user, string pass)
-        {
-            _remoteDB = Factory.CreateChannel();
-            _authenticated = _remoteDB.Authenticate(user, pass);
-            _username = user;
-            _workingDirectory = _remoteDB.GetPrivateFolderPath(user, pass);
-            return _authenticated;
-        }
-
         public string GetPrivateFolderPath(string user, string pass)
         {
             if (_authenticated)
@@ -80,7 +82,7 @@ namespace BitDB
         {
             if (_authenticated)
             {
-                var response =  await _remoteDB.ShellExecute(command + " " + _workingDirectory);
+                var response = await _remoteDB.ShellExecute(command + " " + _workingDirectory);
                 if (command.StartsWith("cd "))
                 {
                     if (response != "not found")
@@ -89,6 +91,75 @@ namespace BitDB
                 return response;
             }
             throw new UnauthorizedAccessException("Call Authenticate(username, pass) first!");
+        }
+        public bool Authenticate()
+        {
+            var security = new NetTcpSecurity { Mode = SecurityMode.TransportWithMessageCredential, Message = new MessageSecurityOverTcp {ClientCredentialType = MessageCredentialType.UserName}};
+            _binding = new NetTcpBinding
+            {
+                CloseTimeout = TimeSpan.FromSeconds(300),
+                ReceiveTimeout = TimeSpan.FromSeconds(300),
+                SendTimeout = TimeSpan.FromSeconds(300),
+                OpenTimeout = TimeSpan.FromSeconds(300),
+                Security = security
+            };
+            _factory = new ChannelFactory<IBitDB>(_binding, Endpoint);
+            _factory.Closed += Factory_Closed;
+            _factory.Faulted += Factory_Faulted;
+            if (_factory.Credentials != null)
+            {
+                _factory.Credentials.UserName.UserName = _username;
+                _factory.Credentials.UserName.Password = _password;
+                _factory.Credentials.ServiceCertificate.Authentication.RevocationMode = X509RevocationMode.NoCheck;
+                _factory.Credentials.ServiceCertificate.Authentication.CertificateValidationMode = X509CertificateValidationMode.None;
+            }
+            try
+            {
+                _remoteDB = _factory.CreateChannel();
+                _workingDirectory = _remoteDB.GetPrivateFolderPath(_username, _password);
+                _authenticated = true;
+                return true;
+            }
+            catch
+            {
+                _authenticated = false;
+                return false;
+            }
+        }
+
+        private void Factory_Faulted(object sender, EventArgs e)
+        {
+            Console.WriteLine("Connection broke...");
+            try
+            {
+                _factory = new ChannelFactory<IBitDB>(_binding, Endpoint);
+                _remoteDB = _factory.CreateChannel();
+                Console.WriteLine("Connection restored!");
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception);
+            }
+        }
+
+        private void Factory_Closed(object sender, EventArgs e)
+        {
+            Console.WriteLine("Connection closed...");
+            try
+            {
+                _factory = new ChannelFactory<IBitDB>(_binding, Endpoint);
+                _remoteDB = _factory.CreateChannel();
+                Console.WriteLine("Connection restored!");
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception);
+            }
+        }
+
+        public void Dispose()
+        {
+            _factory.Close();
         }
     }
 }
