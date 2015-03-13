@@ -2,13 +2,14 @@
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using BitDB_Server.Interface;
 
 namespace BitDB_Server.IO
 {
-    [Serializable]
+    [DataContract]
     public class BitDB : IBitDB
     {
         public int Ping(DateTime sentTime)

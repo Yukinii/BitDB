@@ -203,7 +203,7 @@ namespace BitDB
                 _authenticated = true;
                 return true;
             }
-            catch
+            catch (Exception e)
             {
                 _authenticated = false;
                 return false;
