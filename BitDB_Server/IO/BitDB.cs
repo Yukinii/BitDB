@@ -206,17 +206,13 @@ namespace BitDB_Server.IO
             }
         }
 
-        public async Task<bool> UploadFile(Stream stream, string name)
+        public async Task<bool> UploadFile(Stream stream)
         {
-            if (!File.Exists(name))
+            using (var writer = new FileStream(Path.GetRandomFileName(), FileMode.CreateNew))
             {
-                using (var writer = new FileStream(name,FileMode.CreateNew))
-                {
-                    await stream.CopyToAsync(writer);
-                }
-                return true;
+                await stream.CopyToAsync(writer);
             }
-            throw new InvalidOperationException("File exists");
+            return true;
         }
 
         public Stream DownloadFile(string name)

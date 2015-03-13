@@ -176,9 +176,9 @@ namespace BitDB
             }
         }
 
-        public async Task<bool> UploadFile(Stream stream,string name)
+        public async Task<bool> UploadFile(Stream stream)
         {
-            return await _remoteDB.UploadFile(stream, name);
+            return await _remoteDB.UploadFile(stream);
         }
 
         public Stream DownloadFile(string name)
