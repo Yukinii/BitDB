@@ -43,6 +43,7 @@ namespace BitDB_Server
                     CloseTimeout = TimeSpan.MaxValue,
                     OpenTimeout = TimeSpan.MaxValue,
                     TransferMode = TransferMode.Streamed,
+                    ReaderQuotas = {MaxArrayLength = int.MaxValue,MaxBytesPerRead = int.MaxValue,MaxDepth = int.MaxValue,MaxNameTableCharCount = int.MaxValue,MaxStringContentLength = int.MaxValue},
                     ListenBacklog = 1000,
                     MaxBufferPoolSize = 1024*1024,
                     MaxConnections =  1000000,
