@@ -183,7 +183,8 @@ namespace BitDB
                 ReceiveTimeout = TimeSpan.FromSeconds(300),
                 SendTimeout = TimeSpan.FromSeconds(300),
                 OpenTimeout = TimeSpan.FromSeconds(300),
-                Security = security
+                Security = security,
+                TransferMode = TransferMode.Streamed
             };
             _factory = new ChannelFactory<IBitDB>(_binding, Endpoint);
             _factory.Closed += Factory_Closed;
