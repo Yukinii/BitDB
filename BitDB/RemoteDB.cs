@@ -14,11 +14,11 @@ namespace BitDB
         private static string _username;
         private static string _password;
         private static string _workingDirectory;
+        private static readonly Timer KeepAlive = new Timer(10000);
         private static readonly EndpointAddress Endpoint = new EndpointAddress("net.tcp://79.133.51.71/BitDB");
         private static NetTcpBinding _binding = new NetTcpBinding(SecurityMode.None);
         private static ChannelFactory<IBitDB> _factory = new ChannelFactory<IBitDB>(_binding, Endpoint);
-        private IBitDB _remoteDB;
-        private Timer KeepAlive = new Timer(10000);
+        private static IBitDB _remoteDB;
 
         public RemoteDB(string username, string password)
         {
@@ -32,7 +32,7 @@ namespace BitDB
 
         private void KeepAlive_Elapsed(object sender, ElapsedEventArgs e)
         {
-            _remoteDB.Ping(DateTime.UtcNow);
+            Console.Title = "BitDB | " + _username == "" ? "~" : _username + "@db1.bitflash.xyz | Ping: " + _remoteDB.Ping(DateTime.UtcNow);
         }
 
         [Obsolete("Use CreateDirectory(path) instead.")]
@@ -46,7 +46,7 @@ namespace BitDB
             return CreateFile(path);
         }
 
-        public DateTime Ping(DateTime sent)
+        public int Ping(DateTime sent)
         {
             return _remoteDB.Ping(DateTime.UtcNow);
         }

@@ -48,9 +48,8 @@ namespace Tester
                             db.Save(parts[0], parts[1], parts[2], parts[3]); 
                             break;
                         case "ping":
-                            var timesent = DateTime.UtcNow;
-                            var timereceived= db.Ping(timesent);
-                            Console.WriteLine("Ping: " +(timesent - timereceived).TotalMilliseconds);
+                            var timereceived = db.Ping(DateTime.UtcNow);
+                            Console.WriteLine("Ping: " + timereceived);
                             break;
                         default:
                             Console.WriteLine(db.ShellExecute(cmd).Result);

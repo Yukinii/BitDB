@@ -11,9 +11,9 @@ namespace BitDB_Server.IO
     [Serializable]
     public class BitDB : IBitDB
     {
-        public DateTime Ping(DateTime sentTime)
+        public int Ping(DateTime sentTime)
         {
-            return DateTime.UtcNow;
+            return (DateTime.UtcNow - sentTime).Milliseconds;
         }
 
         public string Load(string file, string section, string key, string Default)

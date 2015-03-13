@@ -8,7 +8,7 @@ namespace BitDB_Server.Interface
     interface IBitDB
     {
         [OperationContract]
-        DateTime Ping(DateTime sentTime);
+        int Ping(DateTime sentTime);
 
         [OperationContract]
         string Load(string file, string section, string key, string Default);
