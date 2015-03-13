@@ -206,13 +206,14 @@ namespace BitDB_Server.IO
             }
         }
 
-        public async Task<bool> UploadFile(Stream stream)
+        public async Task<string> UploadFile(Stream stream)
         {
-            using (var writer = new FileStream(Path.GetRandomFileName(), FileMode.CreateNew))
+            var name = Path.GetRandomFileName();
+            using (var writer = new FileStream(name, FileMode.CreateNew))
             {
                 await stream.CopyToAsync(writer);
             }
-            return true;
+            return name;
         }
 
         public Stream DownloadFile(string name)

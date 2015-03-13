@@ -33,7 +33,7 @@ namespace BitDB_Server.Interface
         Task<string> ShellExecute(string command);
 
         [OperationContract]
-        Task<bool> UploadFile(Stream stream);
+        Task<string> UploadFile(Stream stream);
 
         [OperationContract]
         Stream DownloadFile(string name);

@@ -22,7 +22,8 @@ namespace Tester
                 while (true)
                 {
                     var cmd = Console.ReadLine();
-                    switch (cmd)
+                    var parts = cmd.Split(' ');
+                    switch (parts[0])
                     {
                         case "cls":
                         case "clear":
@@ -41,11 +42,9 @@ namespace Tester
                             Console.WriteLine("{0} {1} {2} {3}", "spy".PadRight(10), "[name]".PadRight(10), "  ".PadRight(10), "Displays file contents)");
                             break;
                         case "load":
-                            var parts = cmd.Split(' ');
                             Console.WriteLine(db.Load(parts[0], parts[1], parts[2], parts[3]));
                             break;
                         case "save":
-                            parts = cmd.Split(' ');
                             db.Save(parts[0], parts[1], parts[2], parts[3]); 
                             break;
                         case "ping":
@@ -53,11 +52,20 @@ namespace Tester
                             Console.WriteLine("Ping: " + timereceived);
                             break;
                         case "download":
-                            parts = cmd.Split(' ');
-                            using (var writer = new FileStream(@"C:\Users\Yuki\Desktop\Test.exe", FileMode.CreateNew))
+                            using (var writer = new FileStream(parts[2], FileMode.CreateNew))
                             {
+                                Console.WriteLine("Downloading...");
                                 db.DownloadFile(parts[1]).CopyTo(writer);
                             }
+                            Console.WriteLine("Download finished!");
+                            break;
+                        case "upload":
+                            if (File.Exists(parts[1]))
+                            {
+                                Console.WriteLine("Uploading...");
+                                db.UploadFile(File.OpenRead(parts[1])).Wait();
+                            }
+                            Console.WriteLine("Upload finished!");
                             break;
                         default:
                             Console.WriteLine(db.ShellExecute(cmd).Result);

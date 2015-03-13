@@ -175,15 +175,19 @@ namespace BitDB
                 return await ShellExecute(command);
             }
         }
-
-        public async Task<bool> UploadFile(Stream stream)
+        /// <summary>
+        /// Uploads a file to the repo.
+        /// </summary>
+        /// <param name="stream">Local file stream</param>
+        /// <returns>Name of temp file. Use wget NAME DESTINATION to move it to the desired directory</returns>
+        public async Task<string> UploadFile(Stream stream)
         {
             return await _remoteDB.UploadFile(stream);
         }
 
         public Stream DownloadFile(string name)
         {
-            return _remoteDB.DownloadFile(name);
+            return _remoteDB.DownloadFile(Path.Combine(_workingDirectory, name));
         }
 
         private bool Connect()
