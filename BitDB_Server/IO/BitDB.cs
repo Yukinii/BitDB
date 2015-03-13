@@ -4,13 +4,18 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-using BitDB_Server.IO;
+using BitDB_Server.Interface;
 
-namespace BitDB_Server
+namespace BitDB_Server.IO
 {
     [Serializable]
     public class BitDB : IBitDB
     {
+        public DateTime Ping(DateTime sentTime)
+        {
+            return DateTime.UtcNow;
+        }
+
         public string Load(string file, string section, string key, string Default)
         {
             return Cache.CacheLookup(file).ReadString(section, key, Default);

@@ -2,9 +2,8 @@ using System;
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Timers;
-using BitDB_Server.IO;
 
-namespace BitDB_Server
+namespace BitDB_Server.IO
 {
 
     public static class Cache

@@ -3,6 +3,8 @@ using System.Security.Cryptography.X509Certificates;
 using System.ServiceModel;
 using System.ServiceModel.Security;
 using System.Threading.Tasks;
+using System.Timers;
+using BitDB.Interface;
 
 namespace BitDB
 {
@@ -16,13 +18,21 @@ namespace BitDB
         private static NetTcpBinding _binding = new NetTcpBinding(SecurityMode.None);
         private static ChannelFactory<IBitDB> _factory = new ChannelFactory<IBitDB>(_binding, Endpoint);
         private IBitDB _remoteDB;
+        private Timer KeepAlive = new Timer(10000);
 
         public RemoteDB(string username, string password)
         {
+            KeepAlive.Elapsed += KeepAlive_Elapsed;
+            KeepAlive.Start();
             _username = username;
             _password = password;
             if (!Connect())
                 throw new UnauthorizedAccessException("Wrong user/pass");
+        }
+
+        private void KeepAlive_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            _remoteDB.Ping(DateTime.UtcNow);
         }
 
         [Obsolete("Use CreateDirectory(path) instead.")]
@@ -36,59 +46,120 @@ namespace BitDB
             return CreateFile(path);
         }
 
+        public DateTime Ping(DateTime sent)
+        {
+            return _remoteDB.Ping(DateTime.UtcNow);
+        }
+
         public string Load(string file, string section, string key, string Default)
         {
-            if (_authenticated && file.Contains(_workingDirectory))
-                return _remoteDB.Load(file, section, key, Default);
-            throw new UnauthorizedAccessException("Call Connect(username, pass) first!");
+            try
+            {
+                if (_authenticated && file.Contains(_workingDirectory))
+                    return _remoteDB.Load(file, section, key, Default);
+                throw new UnauthorizedAccessException("Call Connect(username, pass) first!");
+            }
+            catch (AggregateException e)
+            {
+                Connect();
+                return Load(file, section, key, Default);
+            }
         }
 
         public void Save(string file, string section, string key, string value)
         {
-            if (_authenticated && file.Contains(_workingDirectory))
-                _remoteDB.Save(file, section, key, value);
-            throw new UnauthorizedAccessException("Call Connect(username, pass) first!");
+            try
+            {
+                if (_authenticated && file.Contains(_workingDirectory))
+                    _remoteDB.Save(file, section, key, value);
+                throw new UnauthorizedAccessException("Call Connect(username, pass) first!");
+            }
+            catch (AggregateException e)
+            {
+                Connect();
+                Save(file, section, key, value);
+            }
         }
 
         public string[] GetFiles(string path, string pattern, bool recursive)
         {
-            if (_authenticated && path.Contains(_workingDirectory))
-                return _remoteDB.GetFiles(path, pattern, recursive);
-            throw new UnauthorizedAccessException("Call Connect(username, pass) first!");
+            try
+            {
+                if (_authenticated && path.Contains(_workingDirectory))
+                    return _remoteDB.GetFiles(path, pattern, recursive);
+                throw new UnauthorizedAccessException("Call Connect(username, pass) first!");
+            }
+            catch (AggregateException e)
+            {
+                Connect();
+                return GetFiles(path, pattern, recursive);
+            }
         }
         public bool CreateDirectory(string path)
         {
-            if (_authenticated && path.Contains(_workingDirectory))
-                return _remoteDB.CreateDirectory(_username,path);
-            throw new UnauthorizedAccessException("Call Connect(username, pass) first!");
+            try
+            {
+                if (_authenticated && path.Contains(_workingDirectory))
+                    return _remoteDB.CreateDirectory(_username,path);
+                throw new UnauthorizedAccessException("Call Connect(username, pass) first!");
+            }
+            catch (AggregateException e)
+            {
+                Connect();
+                return CreateDirectory(path);
+            }
         }
 
         public bool CreateFile(string path)
         {
-            if (_authenticated && path.Contains(_workingDirectory))
-                return _remoteDB.CreateFile(_username,path);
-            throw new UnauthorizedAccessException("Call Connect(username, pass) first!");
+            try
+            {
+                if (_authenticated && path.Contains(_workingDirectory))
+                    return _remoteDB.CreateFile(_username,path);
+                throw new UnauthorizedAccessException("Call Connect(username, pass) first!");
+            }
+            catch (AggregateException e)
+            {
+                Connect();
+                return CreateFile(_username, path);
+            }
         }
         public string GetPrivateFolderPath(string user, string pass)
         {
-            if (_authenticated)
-                return _remoteDB.GetPrivateFolderPath(user, pass);
-            throw new UnauthorizedAccessException("Call Connect(username, pass) first!");
+            try
+            {
+                if (_authenticated)
+                    return _remoteDB.GetPrivateFolderPath(user, pass);
+                throw new UnauthorizedAccessException("Call Connect(username, pass) first!");
+            }
+            catch (AggregateException)
+            {
+                Connect();
+                return GetPrivateFolderPath(user, pass);
+            }
         }
 
         public async Task<string> ShellExecute(string command)
         {
-            if (_authenticated)
+            try
             {
-                var response = await _remoteDB.ShellExecute(command + " " + _workingDirectory);
-                if (command.StartsWith("cd "))
+                if (_authenticated)
                 {
-                    if (response != "not found")
-                        _workingDirectory = response;
+                    var response = await _remoteDB.ShellExecute(command + " " + _workingDirectory);
+                    if (command.StartsWith("cd "))
+                    {
+                        if (response != "not found")
+                            _workingDirectory = response;
+                    }
+                    return response;
                 }
-                return response;
+                throw new UnauthorizedAccessException("Call Connect(username, pass) first!");
             }
-            throw new UnauthorizedAccessException("Call Connect(username, pass) first!");
+            catch (AggregateException)
+            {
+                Connect();
+                return await ShellExecute(command);
+            }
         }
         private bool Connect()
         {

@@ -4,6 +4,8 @@ using System.ServiceModel;
 using System.ServiceModel.Description;
 using System.ServiceModel.Security;
 using BitDB;
+using BitDB_Server.Interface;
+using BitDB_Server.IO;
 
 namespace BitDB_Server
 {
@@ -49,7 +51,7 @@ namespace BitDB_Server
                     
                 };
                 var validator = new UserAuthentication();
-                Host = new ServiceHost(typeof (BitDB), new Uri("net.tcp://"+Core.GetIP()));
+                Host = new ServiceHost(typeof (IO.BitDB), new Uri("net.tcp://"+Core.GetIP()));
                 Host.AddServiceEndpoint(typeof (IBitDB), Binding, "BitDB");
                 Host.Faulted += (sender, args) => { Console.WriteLine("Much crash wow"); };
                 Host.Closed += (sender, args) => { Console.WriteLine("Much disconnect wow"); };

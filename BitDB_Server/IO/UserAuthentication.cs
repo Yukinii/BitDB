@@ -1,9 +1,8 @@
 using System.IdentityModel.Selectors;
 using System.IO;
 using System.ServiceModel;
-using BitDB_Server.IO;
 
-namespace BitDB_Server
+namespace BitDB_Server.IO
 {
     public class UserAuthentication : UserNamePasswordValidator
     {

@@ -1,11 +1,15 @@
-﻿using System.ServiceModel;
+﻿using System;
+using System.ServiceModel;
 using System.Threading.Tasks;
 
-namespace BitDB
+namespace BitDB.Interface
 {
     [ServiceContract]
     interface IBitDB
     {
+        [OperationContract]
+        DateTime Ping(DateTime sentTime);
+
         [OperationContract]
         string Load(string file, string section, string key, string Default);
 
@@ -26,5 +30,5 @@ namespace BitDB
 
         [OperationContract]
         Task<string> ShellExecute(string command);
-    }
+        }
 }
