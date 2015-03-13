@@ -1,11 +1,12 @@
 ﻿using System;
+using System.IO;
 using System.ServiceModel;
 using System.Threading.Tasks;
 
 namespace BitDB.Interface
 {
     [ServiceContract]
-    interface IBitDB
+    internal interface IBitDB
     {
         [OperationContract]
         int Ping(DateTime sentTime);
@@ -30,5 +31,11 @@ namespace BitDB.Interface
 
         [OperationContract]
         Task<string> ShellExecute(string command);
-        }
+
+        [OperationContract]
+        Task<bool> UploadFile(Stream stream, string name);
+
+        [OperationContract]
+        Stream DownloadFile(string name);
+    }
 }

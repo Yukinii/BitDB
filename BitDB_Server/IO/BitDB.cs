@@ -205,5 +205,28 @@ namespace BitDB_Server.IO
                 }
             }
         }
+
+        public async Task<bool> UploadFile(Stream stream, string name)
+        {
+            if (!File.Exists(name))
+            {
+                using (var writer = new FileStream(name,FileMode.CreateNew))
+                {
+                    await stream.CopyToAsync(writer);
+                }
+                return true;
+            }
+            throw new InvalidOperationException("File exists");
+        }
+
+        public Stream DownloadFile(string name)
+        {
+            if (File.Exists(name))
+            {
+                return File.Open(name, FileMode.Open);
+            }
+            else
+                throw new FileNotFoundException();
+        }
     }
 }

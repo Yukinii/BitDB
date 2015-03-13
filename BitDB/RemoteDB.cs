@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Security.Cryptography.X509Certificates;
 using System.ServiceModel;
 using System.ServiceModel.Security;
@@ -174,6 +175,17 @@ namespace BitDB
                 return await ShellExecute(command);
             }
         }
+
+        public async Task<bool> UploadFile(Stream stream,string name)
+        {
+            return await _remoteDB.UploadFile(stream, name);
+        }
+
+        public Stream DownloadFile(string name)
+        {
+            return _remoteDB.DownloadFile(name);
+        }
+
         private bool Connect()
         {
             var security = new NetTcpSecurity { Mode = SecurityMode.TransportWithMessageCredential, Message = new MessageSecurityOverTcp {ClientCredentialType = MessageCredentialType.UserName}};
@@ -184,6 +196,7 @@ namespace BitDB
                 SendTimeout = TimeSpan.FromSeconds(300),
                 OpenTimeout = TimeSpan.FromSeconds(300),
                 Security = security,
+                ReaderQuotas = { MaxArrayLength = int.MaxValue, MaxBytesPerRead = int.MaxValue, MaxDepth = int.MaxValue, MaxNameTableCharCount = int.MaxValue, MaxStringContentLength = int.MaxValue },
                 TransferMode = TransferMode.Streamed
             };
             _factory = new ChannelFactory<IBitDB>(_binding, Endpoint);
