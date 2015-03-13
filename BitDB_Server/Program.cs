@@ -48,7 +48,6 @@ namespace BitDB_Server
                     MaxConnections =  1000000,
                     MaxBufferSize = 1024 * 1024,
                     MaxReceivedMessageSize = 1024 * 1024,
-                    ReliableSession = {Enabled = true,InactivityTimeout = TimeSpan.FromSeconds(30),Ordered = true}
                 };
                 var validator = new UserAuthentication();
                 Host = new ServiceHost(typeof (IO.BitDB), new Uri("net.tcp://"+Core.GetIP()));
