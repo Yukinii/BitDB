@@ -13,7 +13,7 @@ namespace BitDB_Server.IO
     {
         public int Ping(DateTime sentTime)
         {
-            return (DateTime.UtcNow - sentTime).Milliseconds;
+            return (sentTime -DateTime.UtcNow).Milliseconds;
         }
 
         public string Load(string file, string section, string key, string Default)
