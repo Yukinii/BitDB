@@ -149,7 +149,11 @@ namespace BitDB
                     if (command.StartsWith("cd "))
                     {
                         if (response != "not found")
+                        {
+                            if (_workingDirectory == response)
+                                return "access denied!";
                             _workingDirectory = response;
+                        }
                     }
                     return response;
                 }

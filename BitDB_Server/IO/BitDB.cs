@@ -116,7 +116,7 @@ namespace BitDB_Server.IO
                 {
                     if (args[1] != "..")
                         return Directory.Exists(Path.Combine(args[2], args[1])) ? Path.Combine(args[2], args[1]) : "not found";
-                    return Directory.GetParent(args[2]).FullName.Contains(@"\Storage") ? Directory.GetParent(args[2]).FullName : "not found";
+                    return Directory.GetParent(args[2]).FullName.Contains(@"\Storage") ? Directory.GetParent(args[2]).FullName : "access denied!";
                 }
                 case "rm":
                 {
