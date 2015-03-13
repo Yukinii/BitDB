@@ -44,11 +44,11 @@ namespace BitDB_Server
                     CloseTimeout = TimeSpan.MaxValue,
                     OpenTimeout = TimeSpan.MaxValue,
                     ListenBacklog = 1000,
-                    MaxBufferPoolSize = 1024*10,
+                    MaxBufferPoolSize = 1024*1024,
                     MaxConnections =  1000000,
-                    MaxBufferSize = 1024*10,
-                    MaxReceivedMessageSize = 1024*10,
-                    
+                    MaxBufferSize = 1024 * 1024,
+                    MaxReceivedMessageSize = 1024 * 1024,
+                    ReliableSession = {Enabled = true,InactivityTimeout = TimeSpan.FromSeconds(30),Ordered = true}
                 };
                 var validator = new UserAuthentication();
                 Host = new ServiceHost(typeof (IO.BitDB), new Uri("net.tcp://"+Core.GetIP()));

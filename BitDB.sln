@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.22609.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitDB", "BitDB\BitDB.csproj", "{7C7D53A5-5A16-4AFA-943E-D9C713335265}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitDBLib", "BitDB\BitDBLib.csproj", "{7C7D53A5-5A16-4AFA-943E-D9C713335265}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitDB_Server", "BitDB_Server\BitDB_Server.csproj", "{BBAED4DD-1013-485E-9CA8-84B43D717F81}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tester", "Tester\Tester.csproj", "{749E0ECC-ECDE-4BE7-9857-918BCE000CB4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitDBClient", "Tester\BitDBClient.csproj", "{749E0ECC-ECDE-4BE7-9857-918BCE000CB4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

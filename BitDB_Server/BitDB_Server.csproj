@@ -50,9 +50,9 @@
     <Compile Include="IO\UserAuthentication.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\BitDB\BitDB.csproj">
+    <ProjectReference Include="..\BitDB\BitDBLib.csproj">
       <Project>{7c7d53a5-5a16-4afa-943e-d9c713335265}</Project>
-      <Name>BitDB</Name>
+      <Name>BitDBLib</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

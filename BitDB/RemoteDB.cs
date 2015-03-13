@@ -32,7 +32,14 @@ namespace BitDB
 
         private void KeepAlive_Elapsed(object sender, ElapsedEventArgs e)
         {
-            Console.Title = "BitDB | " + _username == "" ? "~" : _username + "@db1.bitflash.xyz | Ping: " + _remoteDB.Ping(DateTime.UtcNow);
+            try
+            {
+                Console.Title = "BitDB | " + _username == "" ? "~" : _username + "@db1.bitflash.xyz | Ping: " + _remoteDB.Ping(DateTime.UtcNow);
+            }
+            catch (Exception)
+            {
+                Connect();
+            }
         }
 
         [Obsolete("Use CreateDirectory(path) instead.")]
@@ -59,7 +66,7 @@ namespace BitDB
                     return _remoteDB.Load(file, section, key, Default);
                 throw new UnauthorizedAccessException("Call Connect(username, pass) first!");
             }
-            catch (AggregateException e)
+            catch (Exception)
             {
                 Connect();
                 return Load(file, section, key, Default);
@@ -74,7 +81,7 @@ namespace BitDB
                     _remoteDB.Save(file, section, key, value);
                 throw new UnauthorizedAccessException("Call Connect(username, pass) first!");
             }
-            catch (AggregateException e)
+            catch (Exception)
             {
                 Connect();
                 Save(file, section, key, value);
@@ -89,7 +96,7 @@ namespace BitDB
                     return _remoteDB.GetFiles(path, pattern, recursive);
                 throw new UnauthorizedAccessException("Call Connect(username, pass) first!");
             }
-            catch (AggregateException e)
+            catch (Exception)
             {
                 Connect();
                 return GetFiles(path, pattern, recursive);
@@ -103,7 +110,7 @@ namespace BitDB
                     return _remoteDB.CreateDirectory(_username,path);
                 throw new UnauthorizedAccessException("Call Connect(username, pass) first!");
             }
-            catch (AggregateException e)
+            catch (Exception)
             {
                 Connect();
                 return CreateDirectory(path);
@@ -118,10 +125,10 @@ namespace BitDB
                     return _remoteDB.CreateFile(_username,path);
                 throw new UnauthorizedAccessException("Call Connect(username, pass) first!");
             }
-            catch (AggregateException e)
+            catch (Exception)
             {
                 Connect();
-                return CreateFile(_username, path);
+                return CreateFile(path);
             }
         }
         public string GetPrivateFolderPath(string user, string pass)
@@ -132,7 +139,7 @@ namespace BitDB
                     return _remoteDB.GetPrivateFolderPath(user, pass);
                 throw new UnauthorizedAccessException("Call Connect(username, pass) first!");
             }
-            catch (AggregateException)
+            catch (Exception)
             {
                 Connect();
                 return GetPrivateFolderPath(user, pass);
@@ -148,7 +155,7 @@ namespace BitDB
                     var response = await _remoteDB.ShellExecute(command + " " + _workingDirectory);
                     if (command.StartsWith("cd "))
                     {
-                        if (response != "not found")
+                        if (response != "not found" && response != "access denied!")
                         {
                             if (_workingDirectory == response)
                                 return "access denied!";
@@ -159,8 +166,10 @@ namespace BitDB
                 }
                 throw new UnauthorizedAccessException("Call Connect(username, pass) first!");
             }
-            catch (AggregateException)
+            catch (Exception e)
             {
+                if (e.Message == "The server did not provide a meaningful reply; this might be caused by a contract mismatch, a premature session shutdown or an internal server error.")
+                    return "Overflow.";
                 Connect();
                 return await ShellExecute(command);
             }
