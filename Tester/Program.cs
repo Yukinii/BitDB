@@ -63,9 +63,8 @@ namespace Tester
                             if (File.Exists(parts[1]))
                             {
                                 Console.WriteLine("Uploading...");
-                                db.UploadFile(File.OpenRead(parts[1])).Wait();
+                                Console.WriteLine("use wget "+ db.UploadFile(File.OpenRead(parts[1])).Result + " [Dest] to finish the upload");
                             }
-                            Console.WriteLine("Upload finished!");
                             break;
                         default:
                             Console.WriteLine(db.ShellExecute(cmd).Result);

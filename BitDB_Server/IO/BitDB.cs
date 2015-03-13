@@ -156,6 +156,7 @@ namespace BitDB_Server.IO
                                 using (var client = new WebClient())
                                 {
                                     File.WriteAllBytes(Path.Combine(args[3], args[2]), await client.DownloadDataTaskAsync(args[1]));
+                                    try { File.Delete(args[1]); } catch { }
                                 }
                             }
                             else
