@@ -1,32 +1,12 @@
 ﻿using System;
-using System.IdentityModel.Selectors;
-using System.IO;
 using System.Security.Cryptography.X509Certificates;
 using System.ServiceModel;
 using System.ServiceModel.Description;
 using System.ServiceModel.Security;
 using BitDB;
-using BitDB_Server.IO;
 
 namespace BitDB_Server
 {
-    public class UserAuthentication : UserNamePasswordValidator
-    {
-        public override void Validate(string userName, string password)
-        {
-            Directory.CreateDirectory(@"Y:\BitDB\Users\" + userName);
-            Directory.CreateDirectory(@"Y:\BitDB\Users\" + userName + @"\Storage\");
-            var reader = new INI(@"Y:\BitDB\Users\" + userName + @"\AccountInfo.ini");
-            var pw = reader.ReadString("Account", "Password", "");
-            if (pw == password)
-                return;
-            if (!string.IsNullOrEmpty(pw))
-                throw new FaultException("Unknown Username or Incorrect Password");
-            reader.Write("Account", "Password", password);
-            reader.Flush();
-        }
-    }
-
     class Program
     {
         public static ServiceHost Host;
@@ -77,9 +57,8 @@ namespace BitDB_Server
                 var creds = Host.Description.Behaviors.Find<ServiceCredentials>();
                 creds.UserNameAuthentication.CustomUserNamePasswordValidator = validator;
                 creds.UserNameAuthentication.UserNamePasswordValidationMode = UserNamePasswordValidationMode.Custom;
-                //creds.UserNameAuthentication.IncludeWindowsGroups = false;
-                creds.ClientCertificate.SetCertificate(StoreLocation.CurrentUser, StoreName.My, X509FindType.FindBySubjectName, "192.168.0.4");
-                creds.ServiceCertificate.SetCertificate(StoreLocation.CurrentUser, StoreName.My, X509FindType.FindBySubjectName, "192.168.0.4");
+                creds.ClientCertificate.SetCertificate(StoreLocation.CurrentUser, StoreName.My, X509FindType.FindBySubjectName, Core.GetIP());
+                creds.ServiceCertificate.SetCertificate(StoreLocation.CurrentUser, StoreName.My, X509FindType.FindBySubjectName, Core.GetIP());
                 creds.ClientCertificate.Authentication.TrustedStoreLocation = StoreLocation.LocalMachine;
                 creds.ClientCertificate.Authentication.RevocationMode = X509RevocationMode.NoCheck;
                 creds.ClientCertificate.Authentication.CertificateValidationMode = X509CertificateValidationMode.None;

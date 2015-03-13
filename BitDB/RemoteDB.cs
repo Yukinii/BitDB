@@ -12,7 +12,7 @@ namespace BitDB
         private static string _username;
         private static string _password;
         private static string _workingDirectory;
-        private static readonly EndpointAddress Endpoint = new EndpointAddress("net.tcp://" + Core.GetIP() + "/BitDB");
+        private static readonly EndpointAddress Endpoint = new EndpointAddress("net.tcp://79.133.51.71/BitDB");
         private static NetTcpBinding _binding = new NetTcpBinding(SecurityMode.None);
         private static ChannelFactory<IBitDB> _factory = new ChannelFactory<IBitDB>(_binding, Endpoint);
         private IBitDB _remoteDB;
@@ -21,11 +21,9 @@ namespace BitDB
         {
             _username = username;
             _password = password;
-            if (!Authenticate())
+            if (!Connect())
                 throw new UnauthorizedAccessException("Wrong user/pass");
         }
-
-        
 
         [Obsolete("Use CreateDirectory(path) instead.")]
         public bool CreateDirectory(string user, string path)
@@ -42,40 +40,40 @@ namespace BitDB
         {
             if (_authenticated && file.Contains(_workingDirectory))
                 return _remoteDB.Load(file, section, key, Default);
-            throw new UnauthorizedAccessException("Call Authenticate(username, pass) first!");
+            throw new UnauthorizedAccessException("Call Connect(username, pass) first!");
         }
 
         public void Save(string file, string section, string key, string value)
         {
             if (_authenticated && file.Contains(_workingDirectory))
                 _remoteDB.Save(file, section, key, value);
-            throw new UnauthorizedAccessException("Call Authenticate(username, pass) first!");
+            throw new UnauthorizedAccessException("Call Connect(username, pass) first!");
         }
 
         public string[] GetFiles(string path, string pattern, bool recursive)
         {
             if (_authenticated && path.Contains(_workingDirectory))
                 return _remoteDB.GetFiles(path, pattern, recursive);
-            throw new UnauthorizedAccessException("Call Authenticate(username, pass) first!");
+            throw new UnauthorizedAccessException("Call Connect(username, pass) first!");
         }
         public bool CreateDirectory(string path)
         {
             if (_authenticated && path.Contains(_workingDirectory))
                 return _remoteDB.CreateDirectory(_username,path);
-            throw new UnauthorizedAccessException("Call Authenticate(username, pass) first!");
+            throw new UnauthorizedAccessException("Call Connect(username, pass) first!");
         }
 
         public bool CreateFile(string path)
         {
             if (_authenticated && path.Contains(_workingDirectory))
                 return _remoteDB.CreateFile(_username,path);
-            throw new UnauthorizedAccessException("Call Authenticate(username, pass) first!");
+            throw new UnauthorizedAccessException("Call Connect(username, pass) first!");
         }
         public string GetPrivateFolderPath(string user, string pass)
         {
             if (_authenticated)
                 return _remoteDB.GetPrivateFolderPath(user, pass);
-            throw new UnauthorizedAccessException("Call Authenticate(username, pass) first!");
+            throw new UnauthorizedAccessException("Call Connect(username, pass) first!");
         }
 
         public async Task<string> ShellExecute(string command)
@@ -90,9 +88,9 @@ namespace BitDB
                 }
                 return response;
             }
-            throw new UnauthorizedAccessException("Call Authenticate(username, pass) first!");
+            throw new UnauthorizedAccessException("Call Connect(username, pass) first!");
         }
-        public bool Authenticate()
+        private bool Connect()
         {
             var security = new NetTcpSecurity { Mode = SecurityMode.TransportWithMessageCredential, Message = new MessageSecurityOverTcp {ClientCredentialType = MessageCredentialType.UserName}};
             _binding = new NetTcpBinding
