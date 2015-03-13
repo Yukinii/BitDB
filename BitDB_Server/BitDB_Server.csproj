@@ -41,9 +41,9 @@
     <Reference Include="System.ServiceModel" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BitDB.cs" />
-    <Compile Include="Cache.cs" />
-    <Compile Include="IBitDB.cs" />
+    <Compile Include="IO\BitDB.cs" />
+    <Compile Include="IO\Cache.cs" />
+    <Compile Include="Interface\IBitDB.cs" />
     <Compile Include="IO\INI.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
