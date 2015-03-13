@@ -33,7 +33,7 @@ namespace BitDB_Server
         {
             try
             {
-                ServiceSecurity.Mode = SecurityMode.TransportWithMessageCredential;
+                ServiceSecurity.Mode = SecurityMode.Message;
                 ServiceSecurity.Message = new MessageSecurityOverTcp { ClientCredentialType = MessageCredentialType.UserName };
                 Binding = new NetTcpBinding
                 {

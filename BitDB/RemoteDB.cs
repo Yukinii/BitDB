@@ -163,7 +163,7 @@ namespace BitDB
         }
         private bool Connect()
         {
-            var security = new NetTcpSecurity { Mode = SecurityMode.TransportWithMessageCredential, Message = new MessageSecurityOverTcp {ClientCredentialType = MessageCredentialType.UserName}};
+            var security = new NetTcpSecurity { Mode = SecurityMode.Message, Message = new MessageSecurityOverTcp {ClientCredentialType = MessageCredentialType.UserName}};
             _binding = new NetTcpBinding
             {
                 CloseTimeout = TimeSpan.FromSeconds(300),
