@@ -40,15 +40,15 @@ namespace BitDB_Server
                     Security = ServiceSecurity,
                     ReceiveTimeout = TimeSpan.MaxValue,
                     SendTimeout = TimeSpan.MaxValue,
-                    TransferMode = TransferMode.Buffered,
                     CloseTimeout = TimeSpan.MaxValue,
                     OpenTimeout = TimeSpan.MaxValue,
+                    TransferMode = TransferMode.Streamed,
                     ListenBacklog = 1000,
                     MaxBufferPoolSize = 1024*1024,
                     MaxConnections =  1000000,
                     MaxBufferSize = 1024 * 1024,
                     MaxReceivedMessageSize = 1024 * 1024,
-                };
+                    };
                 var validator = new UserAuthentication();
                 Host = new ServiceHost(typeof (IO.BitDB), new Uri("net.tcp://"+Core.GetIP()));
                 Host.AddServiceEndpoint(typeof (IBitDB), Binding, "BitDB");
