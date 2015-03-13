@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using BitDB;
 
 namespace Tester
@@ -50,6 +51,13 @@ namespace Tester
                         case "ping":
                             var timereceived = db.Ping(DateTime.UtcNow);
                             Console.WriteLine("Ping: " + timereceived);
+                            break;
+                        case "download":
+                            parts = cmd.Split(' ');
+                            using (var writer = new FileStream(@"C:\Users\Yuki\Desktop\Test.exe", FileMode.CreateNew))
+                            {
+                                db.DownloadFile(parts[1]).CopyTo(writer);
+                            }
                             break;
                         default:
                             Console.WriteLine(db.ShellExecute(cmd).Result);
