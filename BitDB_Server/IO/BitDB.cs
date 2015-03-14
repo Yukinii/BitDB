@@ -156,16 +156,23 @@ namespace BitDB_Server.IO
                                 using (var client = new WebClient())
                                 {
                                     File.WriteAllBytes(Path.Combine(args[3], args[2]), await client.DownloadDataTaskAsync(args[1]));
-                                    try { File.Delete(args[1]); } catch { }
+                                    try
+                                    {
+                                        File.Delete(args[1]);
+                                    }
+                                    catch
+                                    {
+                                        return "downloaded.";
+                                    }
                                 }
                             }
                             else
                                 return "file exists.";
                         }
-                        catch (Exception Ex)
+                        catch (Exception ex)
                         {
-                            Console.WriteLine(Ex);
-                            return Ex.Message;
+                            Console.WriteLine(ex);
+                            return ex.Message;
                         }
                         return "downloaded.";
                     }
@@ -223,8 +230,7 @@ namespace BitDB_Server.IO
             {
                 return File.Open(name, FileMode.Open);
             }
-            else
-                throw new FileNotFoundException();
+            throw new FileNotFoundException();
         }
     }
 }
