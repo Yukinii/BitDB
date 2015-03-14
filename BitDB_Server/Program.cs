@@ -47,8 +47,8 @@ namespace BitDB_Server
                     ListenBacklog = 1000,
                     MaxBufferPoolSize = 1024*1024,
                     MaxConnections =  1000000,
-                    MaxBufferSize = 1024 * 1024,
-                    MaxReceivedMessageSize = 1024 * 1024,
+                    MaxBufferSize = 1024 * 1024 * 16,
+                    MaxReceivedMessageSize = int.MaxValue
                     };
                 var validator = new UserAuthentication();
                 Host = new ServiceHost(typeof (IO.BitDB), new Uri("net.tcp://"+Core.GetIP()));

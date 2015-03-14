@@ -22,6 +22,10 @@ namespace Tester
                 while (true)
                 {
                     var cmd = Console.ReadLine();
+
+                    if (string.IsNullOrEmpty(cmd))
+                        continue;
+
                     var parts = cmd.Split(' ');
                     switch (parts[0])
                     {
