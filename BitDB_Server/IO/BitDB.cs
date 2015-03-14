@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Runtime.Serialization;
@@ -207,6 +208,27 @@ namespace BitDB_Server.IO
                             return "file not found";
                         }
                     }
+                case "unzip":
+                {
+                    if (File.Exists(Path.Combine(args[2],args[1])))
+                    {
+                        try
+                        {
+                            using (var archive = new ZipArchive(File.OpenRead(Path.Combine(args[2], args[1])), ZipArchiveMode.Read, false))
+                            {
+                                archive.ExtractToDirectory(Path.Combine(args[2], Path.GetFileNameWithoutExtension(args[1])));
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            return "something went wrong. ("+ex.Message+ ")";
+                        }
+                    }
+                    else
+                        return "file not found.";
+
+                    return "done.";
+                }
                 default:
                 {
                     return "command not recognized!";
