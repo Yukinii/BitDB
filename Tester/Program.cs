@@ -38,8 +38,10 @@ namespace Tester
                             Console.WriteLine("{0} {1} {2} {3}", "mkdir".PadRight(10), "[name]".PadRight(10), " ".PadRight(10), "(creates directory)");
                             Console.WriteLine("{0} {1} {2} {3}", "rm".PadRight(10), "[file]".PadRight(10), "    ".PadRight(10), "(deletes file)");
                             Console.WriteLine("{0} {1} {2} {3}", "rmdir".PadRight(10), "[name]".PadRight(10), " ".PadRight(10), "(deletes directory)");
-                            Console.WriteLine("{0} {1} {2} {3}", "wget".PadRight(10), "[URL]".PadRight(10), "[name]".PadRight(10), "(downloads file)");
+                            Console.WriteLine("{0} {1} {2} {3}", "wget".PadRight(10), "[URL]".PadRight(10), "[name]".PadRight(10), "(downloads file to the server)");
                             Console.WriteLine("{0} {1} {2} {3}", "spy".PadRight(10), "[name]".PadRight(10), "  ".PadRight(10), "Displays file contents)");
+                            Console.WriteLine("{0} {1} {2} {3}", "download".PadRight(10), "[name]".PadRight(10), "[saveas name]".PadRight(10), "(downloads file to your pc)");
+                            Console.WriteLine("{0} {1} {2} {3}", "upload".PadRight(10), "[FileStream]".PadRight(10), "[saveas name]".PadRight(10), "(uploads file from your pc)");
                             break;
                         case "load":
                             Console.WriteLine(db.Load(parts[0], parts[1], parts[2], parts[3]));
@@ -63,7 +65,7 @@ namespace Tester
                             if (File.Exists(parts[1]))
                             {
                                 Console.WriteLine("Uploading...");
-                                Console.WriteLine("use wget "+ db.UploadFile(File.OpenRead(parts[1])).Result + " [Dest] to finish the upload");
+                                Console.WriteLine(db.UploadFile(File.OpenRead(parts[1]), parts[2]).Result);
                             }
                             break;
                         default:

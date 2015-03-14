@@ -17,8 +17,8 @@ namespace BitDB
         private static string _workingDirectory;
         private static readonly Timer KeepAlive = new Timer(10000);
         private static readonly EndpointAddress Endpoint = new EndpointAddress("net.tcp://79.133.51.71/BitDB");
-        private static NetTcpBinding _binding = new NetTcpBinding(SecurityMode.None);
-        private static ChannelFactory<IBitDB> _factory = new ChannelFactory<IBitDB>(_binding, Endpoint);
+        private static NetTcpBinding _binding;
+        private static ChannelFactory<IBitDB> _factory;
         private static IBitDB _remoteDB;
 
         public RemoteDB(string username, string password)
@@ -82,10 +82,10 @@ namespace BitDB
                     _remoteDB.Save(file, section, key, value);
                 throw new UnauthorizedAccessException("Call Connect(username, pass) first!");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 Connect();
-                Save(file, section, key, value);
+                throw new InvalidDataException("The server might have rejected your request (Check InnerException)", ex);
             }
         }
 
@@ -97,10 +97,10 @@ namespace BitDB
                     return _remoteDB.GetFiles(path, pattern, recursive);
                 throw new UnauthorizedAccessException("Call Connect(username, pass) first!");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 Connect();
-                return GetFiles(path, pattern, recursive);
+                throw new InvalidDataException("The server might have rejected your request (Check InnerException)", ex);
             }
         }
         public bool CreateDirectory(string path)
@@ -111,10 +111,10 @@ namespace BitDB
                     return _remoteDB.CreateDirectory(_username,path);
                 throw new UnauthorizedAccessException("Call Connect(username, pass) first!");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 Connect();
-                return CreateDirectory(path);
+                throw new InvalidDataException("The server might have rejected your request (Check InnerException)", ex);
             }
         }
 
@@ -126,10 +126,10 @@ namespace BitDB
                     return _remoteDB.CreateFile(_username,path);
                 throw new UnauthorizedAccessException("Call Connect(username, pass) first!");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 Connect();
-                return CreateFile(path);
+                throw new InvalidDataException("The server might have rejected your request (Check InnerException)", ex);
             }
         }
         public string GetPrivateFolderPath(string user, string pass)
@@ -140,10 +140,10 @@ namespace BitDB
                     return _remoteDB.GetPrivateFolderPath(user, pass);
                 throw new UnauthorizedAccessException("Call Connect(username, pass) first!");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 Connect();
-                return GetPrivateFolderPath(user, pass);
+                throw new InvalidDataException("The server might have rejected your request (Check InnerException)", ex);
             }
         }
 
@@ -172,17 +172,52 @@ namespace BitDB
                 if (e.Message == "The server did not provide a meaningful reply; this might be caused by a contract mismatch, a premature session shutdown or an internal server error.")
                     return "Overflow.";
                 Connect();
-                return await ShellExecute(command);
+                throw new InvalidDataException("The server might have rejected your request (Check InnerException)", e);
             }
         }
+
         /// <summary>
         /// Uploads a file to the repo.
         /// </summary>
         /// <param name="stream">Local file stream</param>
         /// <returns>Name of temp file. Use wget NAME DESTINATION to move it to the desired directory</returns>
+        [Obsolete("Use UploadFileAsync(Stream, Name) instead!")]
         public async Task<string> UploadFile(Stream stream)
         {
-            return await _remoteDB.UploadFile(stream);
+            using (stream)
+            {
+                return await _remoteDB.UploadFile(stream);
+            }
+        }
+
+        /// <summary>
+        /// Uploads a file to the repo.
+        /// </summary>
+        /// <param name="stream">Local file stream</param>
+        /// <param name="name">File name on the server</param>
+        public async Task<string> UploadFile(Stream stream, string name)
+        {
+            using (stream)
+            {
+                var tempfile = await _remoteDB.UploadFile(stream);
+                return await _remoteDB.ShellExecute("wget " + tempfile + " " + name + " " + _workingDirectory);
+            }
+        }
+
+        /// <summary>
+        /// Uploads a file to the repo.
+        /// </summary>
+        /// <param name="file">Local file</param>
+        /// <param name="name">File name on the server</param>
+        public async Task<string> UploadFile(string file, string name)
+        {
+            if (File.Exists(file))
+                throw new FileNotFoundException("File not found.");
+            using (var s = File.OpenRead(file))
+            {
+                var tempfile = await _remoteDB.UploadFile(s);
+                return await _remoteDB.ShellExecute("wget " + tempfile + " " + name + " " + _workingDirectory);
+            }
         }
 
         public Stream DownloadFile(string name)
@@ -199,6 +234,9 @@ namespace BitDB
                 ReceiveTimeout = TimeSpan.FromSeconds(300),
                 SendTimeout = TimeSpan.FromSeconds(300),
                 OpenTimeout = TimeSpan.FromSeconds(300),
+                MaxReceivedMessageSize = int.MaxValue,
+                MaxBufferSize = 1024 * 1024 * 8,
+                MaxConnections = 16,
                 Security = security,
                 ReaderQuotas = { MaxArrayLength = int.MaxValue, MaxBytesPerRead = int.MaxValue, MaxDepth = int.MaxValue, MaxNameTableCharCount = int.MaxValue, MaxStringContentLength = int.MaxValue },
                 TransferMode = TransferMode.Streamed
@@ -220,7 +258,7 @@ namespace BitDB
                 _authenticated = true;
                 return true;
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 _authenticated = false;
                 return false;

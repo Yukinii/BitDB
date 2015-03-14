@@ -162,7 +162,7 @@ namespace BitDB_Server.IO
                                     }
                                     catch
                                     {
-                                        return "downloaded.";
+                                        return "finished.";
                                     }
                                 }
                             }
@@ -174,7 +174,7 @@ namespace BitDB_Server.IO
                             Console.WriteLine(ex);
                             return ex.Message;
                         }
-                        return "downloaded.";
+                        return "finished.";
                     }
                 case "cp":
                     {
