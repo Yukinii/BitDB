@@ -157,11 +157,11 @@ namespace BitDB
                     if (command.StartsWith("cd ") || command.StartsWith("ls ") || command.StartsWith("dir "))
                     {
                         var path = command.Replace("cd ", "").Replace("dir ", "").Replace("ls ", "");
-                        path = Path.Combine(_workingDirectory, path);
+                        path = path.Contains("..") ? Directory.GetParent(_workingDirectory).FullName : Path.Combine(_workingDirectory, path);
 
                         if(command.StartsWith("cd "))
                         response = await _remoteDB.ShellExecute("cd " + path);
-                        if (command.StartsWith("ls "))
+                        else if (command.StartsWith("ls "))
                             response = await _remoteDB.ShellExecute("ls " + path);
                         else
                             response = await _remoteDB.ShellExecute("dir " + path);
