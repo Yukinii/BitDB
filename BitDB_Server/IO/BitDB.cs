@@ -90,9 +90,10 @@ namespace BitDB_Server.IO
                 {
                     try
                     {
+                            var path = command.Replace(args[0], "");
                         var builder = new StringBuilder();
-                        var dirs = Directory.GetDirectories(args[1]);
-                        var files = Directory.GetFiles(args[1]);
+                        var dirs = Directory.GetDirectories(path);
+                        var files = Directory.GetFiles(path);
                         long size = 0;
                         foreach (var directory in dirs)
                         {
@@ -116,11 +117,12 @@ namespace BitDB_Server.IO
                 }
                 case "cd":
                     {
-                        if (args[1] != "..")
+                        if (!command.Contains(".."))
                         {
-                            if (Path.Combine(args[2], args[1]).Contains(@"\Storage"))
+                            command = command.Replace("cd ", "");
+                            if (command != "..")
                             {
-                                return Directory.Exists(Path.Combine(args[2], args[1])) ? Path.Combine(args[2], args[1]) : "not found";
+                                return Directory.GetParent(command).FullName.Contains(@"\Storage") ? command : "access denied!";
                             }
                         }
                         return Directory.GetParent(args[2]).FullName.Contains(@"\Storage") ? Directory.GetParent(args[2]).FullName : "access denied!";
