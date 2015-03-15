@@ -66,7 +66,7 @@ namespace Tester
                             Console.WriteLine("Download finished!");
                             break;
                         case "upload":
-                            if (File.Exists(parts[1]))
+                            if (File.Exists(parts[1]) && parts.Length == 3)
                             {
                                 Console.WriteLine("Uploading...");
                                 Console.WriteLine(db.UploadFile(File.OpenRead(parts[1]), parts[2]).Result);

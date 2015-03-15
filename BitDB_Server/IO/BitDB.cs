@@ -218,7 +218,7 @@ namespace BitDB_Server.IO
                         {
                             using (var archive = new ZipArchive(File.OpenRead(Path.Combine(args[2], args[1])), ZipArchiveMode.Read, false))
                             {
-                                archive.ExtractToDirectory(Path.Combine(args[2], Path.GetFileNameWithoutExtension(args[1])));
+                                archive.ExtractToDirectory(args[2]);
                             }
                         }
                         catch (Exception ex)
