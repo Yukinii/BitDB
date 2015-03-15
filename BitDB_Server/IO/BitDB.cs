@@ -98,16 +98,16 @@ namespace BitDB_Server.IO
                         foreach (var directory in dirs)
                         {
                             var info = new DirectoryInfo(directory);
-                            builder.AppendLine(string.Format("{0} {1} {2} {3}", info.CreationTime.ToShortDateString().PadRight(10), info.CreationTime.ToShortTimeString().PadRight(5), "<DIR>".PadRight(5), directory.Replace(args[1], "")));
+                            builder.AppendLine(string.Format("{0} {1} {2} {3}", info.CreationTime.ToShortDateString().PadRight(10), info.CreationTime.ToShortTimeString().PadRight(5), "<DIR>".PadRight(5), directory.Replace(path, "")));
                         }
                         foreach (var file in files)
                         {
                             var info = new FileInfo(file);
                             size += info.Length;
-                            builder.AppendLine(string.Format("{0} {1} {2} {3}", info.CreationTime.ToShortDateString().PadRight(10), info.CreationTime.ToShortTimeString().PadRight(8), ((info.Length/1024) + "kb").PadRight(8), file.Replace(args[1], "")));
+                            builder.AppendLine(string.Format("{0} {1} {2} {3}", info.CreationTime.ToShortDateString().PadRight(10), info.CreationTime.ToShortTimeString().PadRight(8), ((info.Length/1024) + "kb").PadRight(8), file.Replace(path, "")));
                         }
-                        builder.AppendLine(files.Length + " File(s) \t " + size/1024 + "kbs");
-                        builder.AppendLine(dirs.Length + " Dir(s) \t ");
+                        builder.AppendLine("\t"+files.Length + " File(s) \t " + size/1024 + "kbs");
+                        builder.AppendLine("\t" + dirs.Length + " Dir(s) \t ");
                         return builder.ToString();
                     }
                     catch
