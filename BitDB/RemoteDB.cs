@@ -153,15 +153,29 @@ namespace BitDB
             {
                 if (_authenticated)
                 {
-                    var response = await _remoteDB.ShellExecute(command + " " + _workingDirectory);
-                    if (command.StartsWith("cd "))
+                    string response;
+                    if (command.StartsWith("cd ") || command.StartsWith("ls ") || command.StartsWith("dir "))
                     {
+                        var path = command.Replace("cd ", "").Replace("dir ", "").Replace("ls ", "");
+                        path = Path.Combine(_workingDirectory, path);
+
+                        if(command.StartsWith("cd "))
+                        response = await _remoteDB.ShellExecute("cd " + path);
+                        if (command.StartsWith("ls "))
+                            response = await _remoteDB.ShellExecute("ls " + path);
+                        else
+                            response = await _remoteDB.ShellExecute("dir " + path);
+
                         if (response != "not found" && response != "access denied!")
                         {
                             if (_workingDirectory == response)
                                 return "access denied!";
                             _workingDirectory = response;
                         }
+                    }
+                    else
+                    {
+                        response = await _remoteDB.ShellExecute(command + " " + _workingDirectory);
                     }
                     return response;
                 }
