@@ -80,7 +80,7 @@ namespace BitDB_Server.IO
 
         public async Task<string> ShellExecute(string command)
         {
-            var args = RegexSplit(command);
+            var args = MySplit(command).ToArray();
             if (args.Length == 0)
                 return "empty command";
 
@@ -92,21 +92,20 @@ namespace BitDB_Server.IO
                 {
                     try
                     {
-                            var path = command.Replace(args[0], "");
                         var builder = new StringBuilder();
-                        var dirs = Directory.GetDirectories(path);
-                        var files = Directory.GetFiles(path);
+                        var dirs = Directory.GetDirectories(args[1]);
+                        var files = Directory.GetFiles(args[1]);
                         long size = 0;
                         foreach (var directory in dirs)
                         {
                             var info = new DirectoryInfo(directory);
-                            builder.AppendLine(string.Format("{0} {1} {2} {3}", info.CreationTime.ToShortDateString().PadRight(10), info.CreationTime.ToShortTimeString().PadRight(5), "<DIR>".PadRight(5), directory.Replace(path, "")));
+                            builder.AppendLine(string.Format("{0} {1} {2} {3}", info.CreationTime.ToShortDateString().PadRight(10), info.CreationTime.ToShortTimeString().PadRight(5), "<DIR>".PadRight(5), directory.Replace(args[1], "")));
                         }
                         foreach (var file in files)
                         {
                             var info = new FileInfo(file);
                             size += info.Length;
-                            builder.AppendLine(string.Format("{0} {1} {2} {3}", info.CreationTime.ToShortDateString().PadRight(10), info.CreationTime.ToShortTimeString().PadRight(8), ((info.Length/1024) + "kb").PadRight(8), file.Replace(path, "")));
+                            builder.AppendLine(string.Format("{0} {1} {2} {3}", info.CreationTime.ToShortDateString().PadRight(10), info.CreationTime.ToShortTimeString().PadRight(8), ((info.Length/1024) + "kb").PadRight(8), file.Replace(args[1], "").Replace("\\",""));
                         }
                         builder.AppendLine("\t"+files.Length + " File(s) \t " + size/1024 + "kbs");
                         builder.AppendLine("\t" + dirs.Length + " Dir(s) \t ");
@@ -131,9 +130,9 @@ namespace BitDB_Server.IO
                     }
                 case "rm":
                 {
-                    if (!File.Exists(Path.Combine(args[2], args[1])))
+                    if (!File.Exists(Path.Combine(args[1])))
                             return "not found!";
-                    File.Delete(Path.Combine(args[2], args[1]));
+                    File.Delete(args[1]);
                     return "deleted!";
                 }
                 case "mkdir":
@@ -261,14 +260,53 @@ namespace BitDB_Server.IO
             }
             throw new FileNotFoundException();
         }
-        static Regex re = new Regex(@"^([ ]*((?<r>[^ ""]+)|[""](?<r>[^""]*)[""]))*[ ]*$");
-        public static string[] RegexSplit(string input)
+        public static List<string> MySplit(string input)
         {
-            var m = re.Match(input ?? "");
-            if (!m.Success)
-                throw new ArgumentException("Malformed input.");
+            List<string> split = new List<string>();
+            StringBuilder sb = new StringBuilder();
+            bool splitOnQuote = false;
+            char quote = '"';
+            char space = ' ';
+            foreach (char c in input.ToCharArray())
+            {
+                if (splitOnQuote)
+                {
+                    if (c == quote)
+                    {
+                        if (sb.Length > 0)
+                        {
+                            split.Add(sb.ToString());
+                            sb.Clear();
+                        }
+                        splitOnQuote = false;
+                    }
+                    else { sb.Append(c); }
+                }
+                else
+                {
+                    if (c == space)
+                    {
+                        if (sb.Length > 0)
+                        {
+                            split.Add(sb.ToString());
+                            sb.Clear();
+                        }
+                    }
+                    else if (c == quote)
+                    {
+                        if (sb.Length > 0)
+                        {
+                            split.Add(sb.ToString());
+                            sb.Clear();
+                        }
+                        splitOnQuote = true;
+                    }
 
-            return (from Capture capture in m.Groups["r"].Captures select capture.Value).ToArray();
+                    else { sb.Append(c); }
+                }
+            }
+            if (sb.Length > 0) split.Add(sb.ToString());
+            return split;
         }
     }
 }
