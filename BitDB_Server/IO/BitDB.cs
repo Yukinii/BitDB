@@ -122,7 +122,7 @@ namespace BitDB_Server.IO
                             command = command.Replace("cd ", "");
                             if (command != "..")
                             {
-                                return Directory.GetParent(command).FullName.Contains(@"\Storage") ? command : "access denied!";
+                                return command.Contains(@"\Storage") ? command : "access denied!";
                             }
                         }
                         return Directory.GetParent(args[2]).FullName.Contains(@"\Storage") ? Directory.GetParent(args[2]).FullName : "access denied!";
@@ -201,8 +201,9 @@ namespace BitDB_Server.IO
                     {
                         try
                         {
+                            var path = command.Replace(args[0], "");
                             var builder = new StringBuilder();
-                            builder.Append(File.ReadAllText(Path.Combine(args[2], args[1])));
+                            builder.Append(File.ReadAllText(path));
                             return builder.ToString();
                         }
                         catch
@@ -211,14 +212,16 @@ namespace BitDB_Server.IO
                         }
                     }
                 case "unzip":
-                {
-                    if (File.Exists(Path.Combine(args[2],args[1])))
+                    {
+                        var path = command.Replace(args[0], "");
+                        var parts = path.Split('~');
+                        if (File.Exists(parts[0]))
                     {
                         try
                         {
-                            using (var archive = new ZipArchive(File.OpenRead(Path.Combine(args[2], args[1])), ZipArchiveMode.Read, false))
+                            using (var archive = new ZipArchive(File.OpenRead(parts[0]), ZipArchiveMode.Read, false))
                             {
-                                archive.ExtractToDirectory(args[2]);
+                                    archive.ExtractToDirectory(Path.Combine(Directory.GetParent(parts[0]).FullName, parts[1]));
                             }
                         }
                         catch (Exception ex)
