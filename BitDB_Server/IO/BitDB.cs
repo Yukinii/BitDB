@@ -105,7 +105,7 @@ namespace BitDB_Server.IO
                         {
                             var info = new FileInfo(file);
                             size += info.Length;
-                            builder.AppendLine(string.Format("{0} {1} {2} {3}", info.CreationTime.ToShortDateString().PadRight(10), info.CreationTime.ToShortTimeString().PadRight(8), ((info.Length/1024) + "kb").PadRight(8), file.Replace(args[1], "").Replace("\\",""));
+                            builder.AppendLine(string.Format("{0} {1} {2} {3}", info.CreationTime.ToShortDateString().PadRight(10), info.CreationTime.ToShortTimeString().PadRight(8), ((info.Length/1024) + "kb").PadRight(8), file.Replace(args[1], "").Replace("\\","")));
                         }
                         builder.AppendLine("\t"+files.Length + " File(s) \t " + size/1024 + "kbs");
                         builder.AppendLine("\t" + dirs.Length + " Dir(s) \t ");
