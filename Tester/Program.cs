@@ -58,7 +58,7 @@ namespace Tester
                             Console.WriteLine("Ping: " + timereceived);
                             break;
                         case "download":
-                            using (var writer = new FileStream(parts[2], FileMode.CreateNew))
+                            using (var writer = new FileStream(cmd.Replace(parts[0],"").Replace(parts[1],""), FileMode.OpenOrCreate))
                             {
                                 Console.WriteLine("Downloading...");
                                 db.DownloadFile(parts[1]).CopyTo(writer);

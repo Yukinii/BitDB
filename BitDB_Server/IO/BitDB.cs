@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Runtime.Serialization;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using BitDB_Server.Interface;
 
@@ -78,7 +80,7 @@ namespace BitDB_Server.IO
 
         public async Task<string> ShellExecute(string command)
         {
-            var args = command.Split(' ');
+            var args = RegexSplit(command);
             if (args.Length == 0)
                 return "empty command";
 
@@ -258,6 +260,15 @@ namespace BitDB_Server.IO
                 return File.Open(name, FileMode.Open);
             }
             throw new FileNotFoundException();
+        }
+        static Regex re = new Regex(@"^([ ]*((?<r>[^ ""]+)|[""](?<r>[^""]*)[""]))*[ ]*$");
+        public static string[] RegexSplit(string input)
+        {
+            var m = re.Match(input ?? "");
+            if (!m.Success)
+                throw new ArgumentException("Malformed input.");
+
+            return (from Capture capture in m.Groups["r"].Captures select capture.Value).ToArray();
         }
     }
 }
