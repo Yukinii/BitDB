@@ -6,7 +6,6 @@ using System.Linq;
 using System.Net;
 using System.Runtime.Serialization;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using BitDB_Server.Interface;
 
@@ -262,12 +261,12 @@ namespace BitDB_Server.IO
         }
         public static List<string> MySplit(string input)
         {
-            List<string> split = new List<string>();
-            StringBuilder sb = new StringBuilder();
-            bool splitOnQuote = false;
-            char quote = '"';
-            char space = ' ';
-            foreach (char c in input.ToCharArray())
+            var split = new List<string>();
+            var sb = new StringBuilder();
+            var splitOnQuote = false;
+            const char quote = '"';
+            const char space = ' ';
+            foreach (var c in input.ToCharArray())
             {
                 if (splitOnQuote)
                 {
