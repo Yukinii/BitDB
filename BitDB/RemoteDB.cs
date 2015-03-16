@@ -153,30 +153,84 @@ namespace BitDB
             {
                 if (_authenticated)
                 {
-                    string response;
-                    if (command.StartsWith("cd ") || command.StartsWith("ls ") || command.StartsWith("dir "))
+                    string response = "";
+                    var split = command.Split(' ');
+
+                    switch (split[0])
                     {
-                        var path = command.Replace("cd ", "").Replace("dir ", "").Replace("ls ", "");
-                        path = path.Contains("..") ? Directory.GetParent(_workingDirectory).FullName : Path.Combine(_workingDirectory, path);
-
-                        if(command.StartsWith("cd "))
-                        response = await _remoteDB.ShellExecute("cd " + path);
-                        else if (command.StartsWith("ls "))
-                            response = await _remoteDB.ShellExecute("ls " + path);
-                        else
-                            response = await _remoteDB.ShellExecute("dir " + path);
-
-                        if (response != "not found" && response != "access denied!")
+                        case "ls":
+                        case "dir":
+                            {
+                                response = await _remoteDB.ShellExecute(split[0] + " " + _workingDirectory);
+                                break;
+                            }
+                        case "cp":
+                        case "mv":
+                        case "download":
+                        case "upload":
+                        case "unzip":
                         {
-                            if (_workingDirectory == response)
-                                return "access denied!";
-                            _workingDirectory = response;
+                            if (split.Length > 1)
+                                command = command.Remove(0, split[0].Length + 1).Replace(" ", "~");
+                                response = await _remoteDB.ShellExecute(split[0] + " " + Path.Combine(_workingDirectory, command));
+                                break;
+                            }
+                        case "mkdir":
+                        case "rmdir":
+                        case "rm":
+                        case "spy":
+                            {
+                                if (split.Length > 1)
+                                    command = command.Remove(0, split[0].Length + 1);
+                                response = await _remoteDB.ShellExecute(split[0] + " " + Path.Combine(_workingDirectory, command));
+                                break;
+                            }
+                        case "cd":
+                        {
+                            if (split.Length > 1)
+                                command = command.Remove(0, split[0].Length + 1);
+                            if (command != "..")
+                                response = await _remoteDB.ShellExecute(split[0] + " " + Path.Combine(_workingDirectory, command));
+                            else
+                                response = await _remoteDB.ShellExecute(split[0] + " " + Directory.GetParent(_workingDirectory).FullName);
+
+                            if (response != "not found" && response != "access denied!")
+                            {
+                                if (_workingDirectory == response)
+                                    return "access denied!";
+                                _workingDirectory = response;
+                            }
+
+                            response = "ok.";
+                            break;
                         }
                     }
-                    else
-                    {
-                        response = await _remoteDB.ShellExecute(command + " " + _workingDirectory);
-                    }
+
+
+
+                    //if (command.StartsWith("cd ") || command.StartsWith("ls ") || command.StartsWith("dir "))
+                    //{
+                    //    var path = command.Replace("cd ", "").Replace("dir ", "").Replace("ls ", "");
+                    //    path = path.Contains("..") ? Directory.GetParent(_workingDirectory).FullName : Path.Combine(_workingDirectory, path);
+
+                    //    if(command.StartsWith("cd "))
+                    //    response = await _remoteDB.ShellExecute("cd " + path);
+                    //    else if (command.StartsWith("ls "))
+                    //        response = await _remoteDB.ShellExecute("ls " + path);
+                    //    else
+                    //        response = await _remoteDB.ShellExecute("dir " + path);
+
+                    //    if (response != "not found" && response != "access denied!")
+                    //    {
+                    //        if (_workingDirectory == response)
+                    //            return "access denied!";
+                    //        _workingDirectory = response;
+                    //    }
+                    //}
+                    //else
+                    //{
+                    //    response = await _remoteDB.ShellExecute(command + " " + _workingDirectory);
+                    //}
                     return response;
                 }
                 throw new UnauthorizedAccessException("Call Connect(username, pass) first!");
