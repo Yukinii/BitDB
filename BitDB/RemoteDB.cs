@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography.X509Certificates;
 using System.ServiceModel;
 using System.ServiceModel.Security;
+using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
 using BitDB.Interface;
@@ -153,15 +155,15 @@ namespace BitDB
             {
                 if (_authenticated)
                 {
-                    string response = "";
-                    var split = command.Split(' ');
+                    var response = "";
+                    var split = MySplit(command).ToArray();
 
                     switch (split[0])
                     {
                         case "ls":
                         case "dir":
                             {
-                                response = await _remoteDB.ShellExecute(split[0] + " " + _workingDirectory);
+                                response = await _remoteDB.ShellExecute(split[0] + " " + "\"" + _workingDirectory + "\"");
                                 break;
                             }
                         case "cp":
@@ -172,7 +174,7 @@ namespace BitDB
                         {
                             if (split.Length > 1)
                                 command = command.Remove(0, split[0].Length + 1).Replace(" ", "~");
-                                response = await _remoteDB.ShellExecute(split[0] + " " + Path.Combine(_workingDirectory, command));
+                                response = await _remoteDB.ShellExecute(split[0] + " " + "\"" + Path.Combine(_workingDirectory, command.Replace("\"", "")) + "\"");
                                 break;
                             }
                         case "mkdir":
@@ -182,7 +184,7 @@ namespace BitDB
                             {
                                 if (split.Length > 1)
                                     command = command.Remove(0, split[0].Length + 1);
-                                response = await _remoteDB.ShellExecute(split[0] + " " + Path.Combine(_workingDirectory, command));
+                                response = await _remoteDB.ShellExecute(split[0] + " " + "\"" + Path.Combine(_workingDirectory, command.Replace("\"","")) + "\"");
                                 break;
                             }
                         case "cd":
@@ -190,16 +192,16 @@ namespace BitDB
                             if (split.Length > 1)
                                 command = command.Remove(0, split[0].Length + 1);
                             if (command != "..")
-                                response = await _remoteDB.ShellExecute(split[0] + " " + Path.Combine(_workingDirectory, command));
+                                response = await _remoteDB.ShellExecute(split[0] + " " + "\"" + Path.Combine(_workingDirectory, command.Replace("\"", "")) + "\"");
                             else
                                 response = await _remoteDB.ShellExecute(split[0] + " " + Directory.GetParent(_workingDirectory).FullName);
-
+                            //response = await _remoteDB.ShellExecute(command);
                             if (response != "not found" && response != "access denied!")
                             {
-                                if (_workingDirectory == response)
+                                if (_workingDirectory == response.Replace("\"",""))
                                     return "access denied!";
-                                _workingDirectory = response;
-                            }
+                                _workingDirectory = response.Replace("\"", "");
+                                }
 
                             response = "ok.";
                             break;
@@ -363,6 +365,54 @@ namespace BitDB
             }
         }
 
+        public static List<string> MySplit(string input)
+        {
+            var split = new List<string>();
+            var sb = new StringBuilder();
+            var splitOnQuote = false;
+            const char quote = '"';
+            const char space = ' ';
+            foreach (var c in input.ToCharArray())
+            {
+                if (splitOnQuote)
+                {
+                    if (c == quote)
+                    {
+                        if (sb.Length > 0)
+                        {
+                            split.Add(sb.ToString());
+                            sb.Clear();
+                        }
+                        splitOnQuote = false;
+                    }
+                    else { sb.Append(c); }
+                }
+                else
+                {
+                    if (c == space)
+                    {
+                        if (sb.Length > 0)
+                        {
+                            split.Add(sb.ToString());
+                            sb.Clear();
+                        }
+                    }
+                    else if (c == quote)
+                    {
+                        if (sb.Length > 0)
+                        {
+                            split.Add(sb.ToString());
+                            sb.Clear();
+                        }
+                        splitOnQuote = true;
+                    }
+
+                    else { sb.Append(c); }
+                }
+            }
+            if (sb.Length > 0) split.Add(sb.ToString());
+            return split;
+        }
         public void Dispose()
         {
             _factory.Close();
