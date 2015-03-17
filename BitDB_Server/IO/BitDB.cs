@@ -136,29 +136,27 @@ namespace BitDB_Server.IO
                 }
                 case "mkdir":
                 {
-                    if (Directory.Exists(Path.Combine(args[2], args[1])))
+                    if (Directory.Exists(args[1]))
                         return "directory exists.";
-                    if (Directory.EnumerateDirectories(args[2]).Count() > 512)
-                        return "too many directories (512)";
-                    Directory.CreateDirectory(Path.Combine(args[2], args[1]));
+                    Directory.CreateDirectory(args[1]);
                     return "created!";
                 }
                 case "rmdir":
                 {
-                    if (!Directory.Exists(Path.Combine(args[2], args[1])))
+                    if (!Directory.Exists(args[1]))
                         return "directory doesnt exist.";
-                    Directory.Delete(Path.Combine(args[2], args[1]), true);
+                    Directory.Delete(args[1], true);
                     return "deleted!";
                 }
                 case "wget":
                     {
                         try
                         {
-                            if (!File.Exists(Path.Combine(args[3], args[2])))
+                            if (!File.Exists(args[2]))
                             {
                                 using (var client = new WebClient())
                                 {
-                                    File.WriteAllBytes(Path.Combine(args[3], args[2]), await client.DownloadDataTaskAsync(args[1]));
+                                    File.WriteAllBytes(args[2], await client.DownloadDataTaskAsync(args[1]));
                                     try
                                     {
                                         File.Delete(args[1]);
@@ -181,18 +179,18 @@ namespace BitDB_Server.IO
                     }
                 case "cp":
                     {
-                        if (File.Exists(Path.Combine(args[3], args[1])))
+                        if (File.Exists(args[1]))
                         {
-                            File.Copy(Path.Combine(args[3], args[1]), Path.Combine(args[3], args[2]));
+                            File.Copy(args[1], args[2]);
                             return "copied.";
                         }
                         return "fail.";
                     }
                 case "mv":
                     {
-                        if (File.Exists(Path.Combine(args[3], args[1])))
+                        if (File.Exists(args[1]))
                         {
-                            File.Move(Path.Combine(args[3], args[1]), Path.Combine(args[3], args[2]));
+                            File.Move(args[1], args[2]);
                             return "copied.";
                         }
                         return "fail.";
@@ -201,9 +199,8 @@ namespace BitDB_Server.IO
                     {
                         try
                         {
-                            var path = command.Replace(args[0], "");
                             var builder = new StringBuilder();
-                            builder.Append(File.ReadAllText(path));
+                            builder.Append(File.ReadAllText(args[1]));
                             return builder.ToString();
                         }
                         catch
@@ -213,16 +210,14 @@ namespace BitDB_Server.IO
                     }
                 case "unzip":
                     {
-                        var path = command.Replace(args[0], "");
-                        var parts = path.Split('~');
-                        if (File.Exists(parts[0]))
+                        if (File.Exists(args[1]))
                     {
                         try
                         {
-                            using (var archive = new ZipArchive(File.OpenRead(parts[0]), ZipArchiveMode.Read, false))
-                            {
-                                    archive.ExtractToDirectory(Path.Combine(Directory.GetParent(parts[0]).FullName, parts[1]));
-                            }
+                                using (var archive = new ZipArchive(File.OpenRead(args[1]), ZipArchiveMode.Read, false))
+                                {
+                                    archive.ExtractToDirectory(args[2]);
+                                }
                         }
                         catch (Exception ex)
                         {
