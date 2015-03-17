@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using BitDB;
 
 namespace Tester
@@ -26,8 +28,9 @@ namespace Tester
                     if (string.IsNullOrEmpty(cmd))
                         continue;
 
-                    var parts = cmd.Split(' ');
-                    switch (parts[0])
+                    //var parts = cmd.Split(' ');
+                    var split = MySplit(cmd).ToArray();
+                    switch (split[0])
                     {
                         case "cls":
                         case "clear":
@@ -48,28 +51,28 @@ namespace Tester
                             Console.WriteLine("{0} {1} {2} {3}", "upload".PadRight(10), "[FileStream]".PadRight(10), "[saveas name]".PadRight(10), "(uploads file from your pc)");
                             break;
                         case "load":
-                            Console.WriteLine(db.Load(parts[0], parts[1], parts[2], parts[3]));
+                            Console.WriteLine(db.Load(split[0], split[1], split[2], split[3]));
                             break;
                         case "save":
-                            db.Save(parts[0], parts[1], parts[2], parts[3]); 
+                            db.Save(split[0], split[1], split[2], split[3]); 
                             break;
                         case "ping":
                             var timereceived = db.Ping(DateTime.UtcNow);
                             Console.WriteLine("Ping: " + timereceived);
                             break;
                         case "download":
-                            using (var writer = new FileStream(cmd.Replace(parts[0],"").Replace(parts[1],""), FileMode.OpenOrCreate))
+                            using (var writer = new FileStream(split[2], FileMode.OpenOrCreate))
                             {
                                 Console.WriteLine("Downloading...");
-                                db.DownloadFile(parts[1]).CopyTo(writer);
+                                db.DownloadFile(split[1]).CopyTo(writer);
                             }
                             Console.WriteLine("Download finished!");
                             break;
                         case "upload":
-                            if (File.Exists(parts[1]) && parts.Length == 3)
+                            if (File.Exists(split[1]) && split.Length == 3)
                             {
                                 Console.WriteLine("Uploading...");
-                                Console.WriteLine(db.UploadFile(File.OpenRead(parts[1]), parts[2]).Result);
+                                Console.WriteLine(db.UploadFile(File.OpenRead(split[1]), split[2]).Result);
                             }
                             break;
                         default:
@@ -78,6 +81,55 @@ namespace Tester
                     }
                 }
             }
+        }
+
+        public static List<string> MySplit(string input)
+        {
+            var split = new List<string>();
+            var sb = new StringBuilder();
+            var splitOnQuote = false;
+            const char quote = '"';
+            const char space = ' ';
+            foreach (var c in input.ToCharArray())
+            {
+                if (splitOnQuote)
+                {
+                    if (c == quote)
+                    {
+                        if (sb.Length > 0)
+                        {
+                            split.Add(sb.ToString());
+                            sb.Clear();
+                        }
+                        splitOnQuote = false;
+                    }
+                    else { sb.Append(c); }
+                }
+                else
+                {
+                    if (c == space)
+                    {
+                        if (sb.Length > 0)
+                        {
+                            split.Add(sb.ToString());
+                            sb.Clear();
+                        }
+                    }
+                    else if (c == quote)
+                    {
+                        if (sb.Length > 0)
+                        {
+                            split.Add(sb.ToString());
+                            sb.Clear();
+                        }
+                        splitOnQuote = true;
+                    }
+
+                    else { sb.Append(c); }
+                }
+            }
+            if (sb.Length > 0) split.Add(sb.ToString());
+            return split;
         }
     }
 }

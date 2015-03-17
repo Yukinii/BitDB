@@ -172,11 +172,14 @@ namespace BitDB
                         case "upload":
                         case "unzip":
                         {
-                            if (split.Length > 1)
-                                command = command.Remove(0, split[0].Length + 1).Replace(" ", "~");
-                                response = await _remoteDB.ShellExecute(split[0] + " " + "\"" + Path.Combine(_workingDirectory, command.Replace("\"", "")) + "\"");
-                                break;
-                            }
+                            response = await _remoteDB.ShellExecute(split[0] + " " + "\"" + Path.Combine(_workingDirectory, split[1]) + "\"" + " " + "\"" + Path.Combine(_workingDirectory, split[2]) + "\"");
+                            break;
+                        }
+                        case "wget":
+                        {
+                            response = await _remoteDB.ShellExecute(split[0] + " " +split[1] + " " + "\"" + Path.Combine(_workingDirectory, split[2]) + "\"");
+                            break;
+                        }
                         case "mkdir":
                         case "rmdir":
                         case "rm":
@@ -270,7 +273,7 @@ namespace BitDB
             using (stream)
             {
                 var tempfile = await _remoteDB.UploadFile(stream);
-                return await _remoteDB.ShellExecute("wget " + tempfile + " " + name + " " + _workingDirectory);
+                return await _remoteDB.ShellExecute("wget " + tempfile + " \"" + Path.Combine(_workingDirectory, name) + "\"");
             }
         }
 
