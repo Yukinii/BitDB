@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using BitDB;
 
 namespace Tester
@@ -28,8 +26,7 @@ namespace Tester
                     if (string.IsNullOrEmpty(cmd))
                         continue;
 
-                    //var parts = cmd.Split(' ');
-                    var split = MySplit(cmd).ToArray();
+                    var split = cmd.SplitToArray();
                     switch (split[0])
                     {
                         case "cls":
@@ -81,55 +78,6 @@ namespace Tester
                     }
                 }
             }
-        }
-
-        public static List<string> MySplit(string input)
-        {
-            var split = new List<string>();
-            var sb = new StringBuilder();
-            var splitOnQuote = false;
-            const char quote = '"';
-            const char space = ' ';
-            foreach (var c in input.ToCharArray())
-            {
-                if (splitOnQuote)
-                {
-                    if (c == quote)
-                    {
-                        if (sb.Length > 0)
-                        {
-                            split.Add(sb.ToString());
-                            sb.Clear();
-                        }
-                        splitOnQuote = false;
-                    }
-                    else { sb.Append(c); }
-                }
-                else
-                {
-                    if (c == space)
-                    {
-                        if (sb.Length > 0)
-                        {
-                            split.Add(sb.ToString());
-                            sb.Clear();
-                        }
-                    }
-                    else if (c == quote)
-                    {
-                        if (sb.Length > 0)
-                        {
-                            split.Add(sb.ToString());
-                            sb.Clear();
-                        }
-                        splitOnQuote = true;
-                    }
-
-                    else { sb.Append(c); }
-                }
-            }
-            if (sb.Length > 0) split.Add(sb.ToString());
-            return split;
         }
     }
 }

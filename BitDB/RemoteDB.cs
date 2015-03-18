@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography.X509Certificates;
 using System.ServiceModel;
 using System.ServiceModel.Security;
-using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
 using BitDB.Interface;
@@ -30,7 +28,7 @@ namespace BitDB
             _username = username;
             _password = password;
             if (!Connect())
-                throw new UnauthorizedAccessException("Wrong user/pass");
+                throw new UnauthorizedAccessException("Wrong User/Pass or Server offline");
         }
 
         private void KeepAlive_Elapsed(object sender, ElapsedEventArgs e)
@@ -153,66 +151,65 @@ namespace BitDB
         {
             try
             {
-                if (_authenticated)
+                if (!_authenticated)
+                    throw new UnauthorizedAccessException("Call Connect(username, pass) first!");
+
+                var response = "";
+                var split = command.SplitToArray();
+
+                switch (split[0])
                 {
-                    var response = "";
-                    var split = MySplit(command).ToArray();
-
-                    switch (split[0])
+                    case "ls":
+                    case "dir":
                     {
-                        case "ls":
-                        case "dir":
-                            {
-                                response = await _remoteDB.ShellExecute(split[0] + " " + "\"" + _workingDirectory + "\"");
-                                break;
-                            }
-                        case "cp":
-                        case "mv":
-                        case "download":
-                        case "upload":
-                        case "unzip":
-                        {
-                            response = await _remoteDB.ShellExecute(split[0] + " " + "\"" + Path.Combine(_workingDirectory, split[1]) + "\"" + " " + "\"" + Path.Combine(_workingDirectory, split[2]) + "\"");
-                            break;
-                        }
-                        case "wget":
-                        {
-                            response = await _remoteDB.ShellExecute(split[0] + " " +split[1] + " " + "\"" + Path.Combine(_workingDirectory, split[2]) + "\"");
-                            break;
-                        }
-                        case "mkdir":
-                        case "rmdir":
-                        case "rm":
-                        case "spy":
-                            {
-                                if (split.Length > 1)
-                                    command = command.Remove(0, split[0].Length + 1);
-                                response = await _remoteDB.ShellExecute(split[0] + " " + "\"" + Path.Combine(_workingDirectory, command.Replace("\"","")) + "\"");
-                                break;
-                            }
-                        case "cd":
-                        {
-                            if (split.Length > 1)
-                                command = command.Remove(0, split[0].Length + 1);
-                            if (command != "..")
-                                response = await _remoteDB.ShellExecute(split[0] + " " + "\"" + Path.Combine(_workingDirectory, command.Replace("\"", "")) + "\"");
-                            else
-                                response = await _remoteDB.ShellExecute(split[0] + " " + Directory.GetParent(_workingDirectory).FullName);
-                        
-                            if (response != "not found" && response != "access denied!")
-                            {
-                                if (_workingDirectory == response.Replace("\"",""))
-                                    return "access denied!";
-                                _workingDirectory = response.Replace("\"", "");
-                                }
-
-                            response = "ok.";
-                            break;
-                        }
+                        response = await _remoteDB.ShellExecute(split[0] + " " + "\"" + _workingDirectory + "\"");
+                        break;
                     }
-                    return response;
+                    case "cp":
+                    case "mv":
+                    case "download":
+                    case "upload":
+                    case "unzip":
+                    {
+                        response = await _remoteDB.ShellExecute(split[0] + " " + "\"" + Path.Combine(_workingDirectory, split[1]) + "\"" + " " + "\"" + Path.Combine(_workingDirectory, split[2]) + "\"");
+                        break;
+                    }
+                    case "wget":
+                    {
+                        response = await _remoteDB.ShellExecute(split[0] + " " +split[1] + " " + "\"" + Path.Combine(_workingDirectory, split[2]) + "\"");
+                        break;
+                    }
+                    case "mkdir":
+                    case "rmdir":
+                    case "rm":
+                    case "spy":
+                    {
+                        if (split.Length > 1)
+                            command = command.Remove(0, split[0].Length + 1);
+                        response = await _remoteDB.ShellExecute(split[0] + " " + "\"" + Path.Combine(_workingDirectory, command.Replace("\"","")) + "\"");
+                        break;
+                    }
+                    case "cd":
+                    {
+                        if (split.Length > 1)
+                            command = command.Remove(0, split[0].Length + 1);
+                        if (command != "..")
+                            response = await _remoteDB.ShellExecute(split[0] + " " + "\"" + Path.Combine(_workingDirectory, command.Replace("\"", "")) + "\"");
+                        else
+                            response = await _remoteDB.ShellExecute(split[0] + " " + Directory.GetParent(_workingDirectory).FullName);
+                        
+                        if (response != "not found" && response != "access denied!")
+                        {
+                            if (_workingDirectory == response.Replace("\"",""))
+                                return "access denied!";
+                            _workingDirectory = response.Replace("\"", "");
+                        }
+
+                        response = "ok.";
+                        break;
+                    }
                 }
-                throw new UnauthorizedAccessException("Call Connect(username, pass) first!");
+                return response;
             }
             catch (Exception e)
             {
@@ -231,6 +228,8 @@ namespace BitDB
         [Obsolete("Use UploadFileAsync(Stream, Name) instead!")]
         public async Task<string> UploadFile(Stream stream)
         {
+            if (!_authenticated)
+                throw new UnauthorizedAccessException("Call Connect(username, pass) first!");
             using (stream)
             {
                 return await _remoteDB.UploadFile(stream);
@@ -244,6 +243,8 @@ namespace BitDB
         /// <param name="name">File name on the server</param>
         public async Task<string> UploadFile(Stream stream, string name)
         {
+            if (!_authenticated)
+                throw new UnauthorizedAccessException("Call Connect(username, pass) first!");
             using (stream)
             {
                 var tempfile = await _remoteDB.UploadFile(stream);
@@ -269,6 +270,8 @@ namespace BitDB
 
         public Stream DownloadFile(string name)
         {
+            if (!_authenticated)
+                throw new UnauthorizedAccessException("Call Connect(username, pass) first!");
             return _remoteDB.DownloadFile(Path.Combine(_workingDirectory, name));
         }
 
@@ -317,7 +320,10 @@ namespace BitDB
             Console.WriteLine("Connection broke...");
             try
             {
+                _factory.Faulted -= Factory_Faulted;
                 _factory = new ChannelFactory<IBitDB>(_binding, Endpoint);
+                _factory.Faulted += Factory_Faulted;
+                _factory.Closed += Factory_Closed;
                 _remoteDB = _factory.CreateChannel();
                 Console.WriteLine("Connection restored!");
             }
@@ -332,7 +338,10 @@ namespace BitDB
             Console.WriteLine("Connection closed...");
             try
             {
+                _factory.Closed -= Factory_Closed;
                 _factory = new ChannelFactory<IBitDB>(_binding, Endpoint);
+                _factory.Faulted += Factory_Faulted;
+                _factory.Closed += Factory_Closed;
                 _remoteDB = _factory.CreateChannel();
                 Console.WriteLine("Connection restored!");
             }
@@ -342,54 +351,6 @@ namespace BitDB
             }
         }
 
-        public static List<string> MySplit(string input)
-        {
-            var split = new List<string>();
-            var sb = new StringBuilder();
-            var splitOnQuote = false;
-            const char quote = '"';
-            const char space = ' ';
-            foreach (var c in input.ToCharArray())
-            {
-                if (splitOnQuote)
-                {
-                    if (c == quote)
-                    {
-                        if (sb.Length > 0)
-                        {
-                            split.Add(sb.ToString());
-                            sb.Clear();
-                        }
-                        splitOnQuote = false;
-                    }
-                    else { sb.Append(c); }
-                }
-                else
-                {
-                    if (c == space)
-                    {
-                        if (sb.Length > 0)
-                        {
-                            split.Add(sb.ToString());
-                            sb.Clear();
-                        }
-                    }
-                    else if (c == quote)
-                    {
-                        if (sb.Length > 0)
-                        {
-                            split.Add(sb.ToString());
-                            sb.Clear();
-                        }
-                        splitOnQuote = true;
-                    }
-
-                    else { sb.Append(c); }
-                }
-            }
-            if (sb.Length > 0) split.Add(sb.ToString());
-            return split;
-        }
         public void Dispose()
         {
             _factory.Close();
