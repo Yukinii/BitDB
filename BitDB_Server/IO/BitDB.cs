@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Net;
+using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
@@ -61,7 +62,7 @@ namespace BitDB_Server.IO
 
         public bool Authenticate(string user, string pass)
         {
-            var reader = new INI(@"X:\BitDB\Users\" + user + @"\AccountInfo.ini");
+            var reader = new INI(@"Users\" + user + @"\AccountInfo.ini");
             var password = reader.ReadString("Account", "Password", "");
             if (password == pass)
                 return true;
@@ -73,7 +74,7 @@ namespace BitDB_Server.IO
 
         public string GetPrivateFolderPath(string user, string pass)
         {
-            return @"Y:\BitDB\Users\" + user + @"\Storage\";
+            return Assembly.GetExecutingAssembly().Location.Replace(Path.GetFileName(Assembly.GetExecutingAssembly().Location), "") + @"\Users\" + user + @"\Storage\";
         }
 
         public async Task<string> ShellExecute(string command)

@@ -53,7 +53,7 @@ namespace BitDB_Server
                     MaxReceivedMessageSize = int.MaxValue
                     };
                 var validator = new UserAuthentication();
-                Host = new ServiceHost(typeof (BitDB), new Uri("net.tcp://"+Core.GetIP()));
+                Host = new ServiceHost(typeof (BitDB), new Uri("net.tcp://eubfwcf.cloudapp.net"));
                 Host.AddServiceEndpoint(typeof (IBitDB), Binding, "BitDB");
                 Host.Faulted += (sender, args) => { Console.WriteLine("Much crash wow"); };
                 Host.Closed += (sender, args) => { Console.WriteLine("Much disconnect wow"); };
@@ -61,8 +61,8 @@ namespace BitDB_Server
                 var creds = Host.Description.Behaviors.Find<ServiceCredentials>();
                 creds.UserNameAuthentication.CustomUserNamePasswordValidator = validator;
                 creds.UserNameAuthentication.UserNamePasswordValidationMode = UserNamePasswordValidationMode.Custom;
-                creds.ClientCertificate.SetCertificate(StoreLocation.CurrentUser, StoreName.My, X509FindType.FindBySubjectName, Core.GetIP());
-                creds.ServiceCertificate.SetCertificate(StoreLocation.CurrentUser, StoreName.My, X509FindType.FindBySubjectName, Core.GetIP());
+                creds.ClientCertificate.SetCertificate(StoreLocation.CurrentUser, StoreName.My, X509FindType.FindBySubjectName, "WCfServer");
+                creds.ServiceCertificate.SetCertificate(StoreLocation.CurrentUser, StoreName.My, X509FindType.FindBySubjectName, "WCfServer");
                 creds.ClientCertificate.Authentication.TrustedStoreLocation = StoreLocation.LocalMachine;
                 creds.ClientCertificate.Authentication.RevocationMode = X509RevocationMode.NoCheck;
                 creds.ClientCertificate.Authentication.CertificateValidationMode = X509CertificateValidationMode.None;

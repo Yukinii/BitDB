@@ -16,7 +16,7 @@ namespace BitDB
         private static string _password;
         private static string _workingDirectory;
         private static readonly Timer KeepAlive = new Timer(10000);
-        private static readonly EndpointAddress Endpoint = new EndpointAddress("net.tcp://79.133.51.71/BitDB");
+        private static EndpointAddress Endpoint;
         private static NetTcpBinding _binding;
         private static ChannelFactory<IBitDB> _factory;
         private static IBitDB _remoteDB;
@@ -277,7 +277,9 @@ namespace BitDB
 
         private bool Connect()
         {
-            var security = new NetTcpSecurity { Mode = SecurityMode.TransportWithMessageCredential, Message = new MessageSecurityOverTcp {ClientCredentialType = MessageCredentialType.UserName}};
+            var identity = EndpointIdentity.CreateDnsIdentity("WCfServer");
+            Endpoint =  new EndpointAddress(new Uri("net.tcp://eubfwcf.cloudapp.net/BitDB"), identity);
+            var security = new NetTcpSecurity { Mode = SecurityMode.TransportWithMessageCredential, Message = new MessageSecurityOverTcp { ClientCredentialType = MessageCredentialType.UserName } };
             _binding = new NetTcpBinding
             {
                 CloseTimeout = TimeSpan.FromSeconds(300),
@@ -308,7 +310,7 @@ namespace BitDB
                 _authenticated = true;
                 return true;
             }
-            catch (Exception)
+            catch (Exception Ex)
             {
                 _authenticated = false;
                 return false;
