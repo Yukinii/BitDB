@@ -54,12 +54,6 @@
     <Compile Include="IO\UserAuthentication.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\BitDB\BitDBLib.csproj">
-      <Project>{7c7d53a5-5a16-4afa-943e-d9c713335265}</Project>
-      <Name>BitDBLib</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>

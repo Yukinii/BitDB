@@ -198,7 +198,7 @@ namespace BitDB
                                 response = await _remoteDB.ShellExecute(split[0] + " " + "\"" + Path.Combine(_workingDirectory, command.Replace("\"", "")) + "\"");
                             else
                                 response = await _remoteDB.ShellExecute(split[0] + " " + Directory.GetParent(_workingDirectory).FullName);
-                            //response = await _remoteDB.ShellExecute(command);
+                        
                             if (response != "not found" && response != "access denied!")
                             {
                                 if (_workingDirectory == response.Replace("\"",""))
@@ -210,32 +210,6 @@ namespace BitDB
                             break;
                         }
                     }
-
-
-
-                    //if (command.StartsWith("cd ") || command.StartsWith("ls ") || command.StartsWith("dir "))
-                    //{
-                    //    var path = command.Replace("cd ", "").Replace("dir ", "").Replace("ls ", "");
-                    //    path = path.Contains("..") ? Directory.GetParent(_workingDirectory).FullName : Path.Combine(_workingDirectory, path);
-
-                    //    if(command.StartsWith("cd "))
-                    //    response = await _remoteDB.ShellExecute("cd " + path);
-                    //    else if (command.StartsWith("ls "))
-                    //        response = await _remoteDB.ShellExecute("ls " + path);
-                    //    else
-                    //        response = await _remoteDB.ShellExecute("dir " + path);
-
-                    //    if (response != "not found" && response != "access denied!")
-                    //    {
-                    //        if (_workingDirectory == response)
-                    //            return "access denied!";
-                    //        _workingDirectory = response;
-                    //    }
-                    //}
-                    //else
-                    //{
-                    //    response = await _remoteDB.ShellExecute(command + " " + _workingDirectory);
-                    //}
                     return response;
                 }
                 throw new UnauthorizedAccessException("Call Connect(username, pass) first!");

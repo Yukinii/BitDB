@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
 using System.ServiceModel;
 using System.ServiceModel.Description;
 using System.ServiceModel.Security;
-using BitDB;
 using BitDB_Server.Interface;
 using BitDB_Server.IO;
 
@@ -51,7 +53,7 @@ namespace BitDB_Server
                     MaxReceivedMessageSize = int.MaxValue
                     };
                 var validator = new UserAuthentication();
-                Host = new ServiceHost(typeof (IO.BitDB), new Uri("net.tcp://"+Core.GetIP()));
+                Host = new ServiceHost(typeof (BitDB), new Uri("net.tcp://"+Core.GetIP()));
                 Host.AddServiceEndpoint(typeof (IBitDB), Binding, "BitDB");
                 Host.Faulted += (sender, args) => { Console.WriteLine("Much crash wow"); };
                 Host.Closed += (sender, args) => { Console.WriteLine("Much disconnect wow"); };
@@ -72,6 +74,19 @@ namespace BitDB_Server
             {
                 Console.WriteLine(e);
                 return false;
+            }
+        }
+        public static class Core
+        {
+            public static string GetIP()
+            {
+                var host = Dns.GetHostEntry(Dns.GetHostName());
+
+                foreach (var ip in host.AddressList.Where(ip => ip.AddressFamily == AddressFamily.InterNetwork))
+                {
+                    return ip.ToString();
+                }
+                return "0.0.0.0";
             }
         }
     }

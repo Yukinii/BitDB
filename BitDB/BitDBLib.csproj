@@ -46,7 +46,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="RemoteDB.cs" />
-    <Compile Include="Core.cs" />
     <Compile Include="Interface\IBitDB.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
