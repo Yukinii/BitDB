@@ -72,6 +72,9 @@ namespace Tester
                                 Console.WriteLine(db.UploadFile(File.OpenRead(split[1]), split[2]).Result);
                             }
                             break;
+                        case "bitch":
+                            db.Bitch();
+                            break;
                         default:
                             Console.WriteLine(db.ShellExecute(cmd).Result);
                             break;

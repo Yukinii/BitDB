@@ -77,8 +77,10 @@ namespace BitDB_Server.IO
             return Assembly.GetExecutingAssembly().Location.Replace(Path.GetFileName(Assembly.GetExecutingAssembly().Location), "") + @"\Users\" + user + @"\Storage\";
         }
 
-        public async Task<string> ShellExecute(string command)
+        public async Task<string> ShellExecute(string command, string username, string password)
         {
+            if (!Authenticate(username, password))
+                return "access denied!";
             var args = MySplit(command).ToArray();
             if (args.Length == 0)
                 return "empty command";
@@ -91,6 +93,8 @@ namespace BitDB_Server.IO
                 {
                     try
                     {
+                        if (!args[1].Contains("Users\\" + username + "\\Storage"))
+                            return "access denied!";
                         var builder = new StringBuilder();
                         var dirs = Directory.GetDirectories(args[1]);
                         var files = Directory.GetFiles(args[1]);
@@ -104,9 +108,9 @@ namespace BitDB_Server.IO
                         {
                             var info = new FileInfo(file);
                             size += info.Length;
-                            builder.AppendLine(string.Format("{0} {1} {2} {3}", info.CreationTime.ToShortDateString().PadRight(10), info.CreationTime.ToShortTimeString().PadRight(8), ((info.Length/1024) + "kb").PadRight(8), file.Replace(args[1], "").Replace("\\","")));
+                            builder.AppendLine(string.Format("{0} {1} {2} {3}", info.CreationTime.ToShortDateString().PadRight(10), info.CreationTime.ToShortTimeString().PadRight(8), ((info.Length/1024) + "kb").PadRight(8), file.Replace(args[1], "").Replace("\\", "")));
                         }
-                        builder.AppendLine("\t"+files.Length + " File(s) \t " + size/1024 + "kbs");
+                        builder.AppendLine("\t" + files.Length + " File(s) \t " + size/1024 + "kbs");
                         builder.AppendLine("\t" + dirs.Length + " Dir(s) \t ");
                         return builder.ToString();
                     }
@@ -116,26 +120,30 @@ namespace BitDB_Server.IO
                     }
                 }
                 case "cd":
+                {
+                    if (!command.Contains(".."))
                     {
-                        if (!command.Contains(".."))
+                        command = command.Replace("cd ", "");
+                        if (command != "..")
                         {
-                            command = command.Replace("cd ", "");
-                            if (command != "..")
-                            {
-                                return command.Contains(@"\Storage") ? command : "access denied!";
-                            }
+                            return command.Contains(@"\Users\" + username + @"\Storage") ? command : "access denied!";
                         }
-                        return Directory.GetParent(args[2]).FullName.Contains(@"\Storage") ? Directory.GetParent(args[2]).FullName : "access denied!";
                     }
+                    return Directory.GetParent(args[2]).FullName.Contains(@"\Users\" + username + @"\Storage") ? Directory.GetParent(args[2]).FullName : "access denied!";
+                }
                 case "rm":
                 {
+                    if (!args[1].Contains("Users\\" + username + "\\Storage"))
+                        return "access denied!";
                     if (!File.Exists(Path.Combine(args[1])))
-                            return "not found!";
+                        return "not found!";
                     File.Delete(args[1]);
                     return "deleted!";
                 }
                 case "mkdir":
                 {
+                    if (!args[1].Contains("Users\\" + username + "\\Storage"))
+                        return "access denied!";
                     if (Directory.Exists(args[1]))
                         return "directory exists.";
                     Directory.CreateDirectory(args[1]);
@@ -143,85 +151,97 @@ namespace BitDB_Server.IO
                 }
                 case "rmdir":
                 {
+                    if (!args[1].Contains("Users\\" + username + "\\Storage"))
+                        return "access denied!";
                     if (!Directory.Exists(args[1]))
                         return "directory doesnt exist.";
                     Directory.Delete(args[1], true);
                     return "deleted!";
                 }
                 case "wget":
+                {
+                    if (!args[2].Contains("Users\\" + username + "\\Storage"))
+                        return "access denied!";
+                    try
                     {
-                        try
+                        if (!File.Exists(args[2]))
                         {
-                            if (!File.Exists(args[2]))
+                            using (var client = new WebClient())
                             {
-                                using (var client = new WebClient())
+                                File.WriteAllBytes(args[2], await client.DownloadDataTaskAsync(args[1]));
+                                try
                                 {
-                                    File.WriteAllBytes(args[2], await client.DownloadDataTaskAsync(args[1]));
-                                    try
-                                    {
-                                        File.Delete(args[1]);
-                                    }
-                                    catch
-                                    {
-                                        return "finished.";
-                                    }
+                                    File.Delete(args[1]);
+                                }
+                                catch
+                                {
+                                    return "finished.";
                                 }
                             }
-                            else
-                                return "file exists.";
                         }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine(ex);
-                            return ex.Message;
-                        }
-                        return "finished.";
+                        else
+                            return "file exists.";
                     }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex);
+                        return ex.Message;
+                    }
+                    return "finished.";
+                }
                 case "cp":
+                {
+                    if (!args[1].Contains("Users\\" + username + "\\Storage"))
+                        return "access denied!";
+                    if (File.Exists(args[1]))
                     {
-                        if (File.Exists(args[1]))
-                        {
-                            File.Copy(args[1], args[2]);
-                            return "copied.";
-                        }
-                        return "fail.";
+                        File.Copy(args[1], args[2]);
+                        return "copied.";
                     }
+                    return "fail.";
+                }
                 case "mv":
+                {
+                    if (!args[1].Contains("Users\\" + username + "\\Storage"))
+                        return "access denied!";
+                    if (File.Exists(args[1]))
                     {
-                        if (File.Exists(args[1]))
-                        {
-                            File.Move(args[1], args[2]);
-                            return "copied.";
-                        }
-                        return "fail.";
+                        File.Move(args[1], args[2]);
+                        return "copied.";
                     }
+                    return "fail.";
+                }
                 case "spy":
+                {
+                    if (!args[1].Contains("Users\\" + username + "\\Storage"))
+                        return "access denied!";
+                    try
                     {
-                        try
-                        {
-                            var builder = new StringBuilder();
-                            builder.Append(File.ReadAllText(args[1]));
-                            return builder.ToString();
-                        }
-                        catch
-                        {
-                            return "file not found";
-                        }
+                        var builder = new StringBuilder();
+                        builder.Append(File.ReadAllText(args[1]));
+                        return builder.ToString();
                     }
-                case "unzip":
+                    catch
                     {
-                        if (File.Exists(args[1]))
+                        return "file not found";
+                    }
+                }
+                case "unzip":
+                {
+                    if (!args[1].Contains("Users\\" + username + "\\Storage"))
+                        return "access denied!";
+                    if (File.Exists(args[1]))
                     {
                         try
                         {
-                                using (var archive = new ZipArchive(File.OpenRead(args[1]), ZipArchiveMode.Read, false))
-                                {
-                                    archive.ExtractToDirectory(args[2]);
-                                }
+                            using (var archive = new ZipArchive(File.OpenRead(args[1]), ZipArchiveMode.Read, false))
+                            {
+                                archive.ExtractToDirectory(args[2]);
+                            }
                         }
                         catch (Exception ex)
                         {
-                            return "something went wrong. ("+ex.Message+ ")";
+                            return "something went wrong. (" + ex.Message + ")";
                         }
                     }
                     else

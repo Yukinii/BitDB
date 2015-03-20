@@ -30,7 +30,7 @@ namespace BitDB_Server.Interface
         string GetPrivateFolderPath(string user, string pass);
 
         [OperationContract]
-        Task<string> ShellExecute(string command);
+        Task<string> ShellExecute(string command, string username, string password);
 
         [OperationContract]
         Task<string> UploadFile(Stream stream);

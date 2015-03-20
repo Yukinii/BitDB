@@ -2,6 +2,7 @@
 using System.IO;
 using System.Security.Cryptography.X509Certificates;
 using System.ServiceModel;
+using System.ServiceModel.Description;
 using System.ServiceModel.Security;
 using System.Threading.Tasks;
 using System.Timers;
@@ -16,7 +17,7 @@ namespace BitDB
         private static string _password;
         private static string _workingDirectory;
         private static readonly Timer KeepAlive = new Timer(10000);
-        private static EndpointAddress Endpoint;
+        private static EndpointAddress _endpoint;
         private static NetTcpBinding _binding;
         private static ChannelFactory<IBitDB> _factory;
         private static IBitDB _remoteDB;
@@ -27,6 +28,7 @@ namespace BitDB
             KeepAlive.Start();
             _username = username;
             _password = password;
+            _workingDirectory = "Z:\\Documents\\Visual Studio 2015\\Projects\\BitDB\\BitDB_Server\\bin\\Debug\\Users\\yuki\\Storage";
             if (!Connect())
                 throw new UnauthorizedAccessException("Wrong User/Pass or Server offline");
         }
@@ -147,6 +149,11 @@ namespace BitDB
             }
         }
 
+        public Task<string> ShellExecute(string command, string username, string password)
+        {
+            return ShellExecute(command);
+        }
+
         public async Task<string> ShellExecute(string command)
         {
             try
@@ -162,7 +169,7 @@ namespace BitDB
                     case "ls":
                     case "dir":
                     {
-                        response = await _remoteDB.ShellExecute(split[0] + " " + "\"" + _workingDirectory + "\"");
+                        response = await _remoteDB.ShellExecute(split[0] + " " + "\"" + _workingDirectory + "\"",_username,_password);
                         break;
                     }
                     case "cp":
@@ -171,13 +178,13 @@ namespace BitDB
                     case "upload":
                     case "unzip":
                     {
-                        response = await _remoteDB.ShellExecute(split[0] + " " + "\"" + Path.Combine(_workingDirectory, split[1]) + "\"" + " " + "\"" + Path.Combine(_workingDirectory, split[2]) + "\"");
-                        break;
+                        response = await _remoteDB.ShellExecute(split[0] + " " + "\"" + Path.Combine(_workingDirectory, split[1]) + "\"" + " " + "\"" + Path.Combine(_workingDirectory, split[2]) + "\"", _username, _password);
+                            break;
                     }
                     case "wget":
                     {
-                        response = await _remoteDB.ShellExecute(split[0] + " " +split[1] + " " + "\"" + Path.Combine(_workingDirectory, split[2]) + "\"");
-                        break;
+                        response = await _remoteDB.ShellExecute(split[0] + " " +split[1] + " " + "\"" + Path.Combine(_workingDirectory, split[2]) + "\"", _username, _password);
+                            break;
                     }
                     case "mkdir":
                     case "rmdir":
@@ -186,19 +193,19 @@ namespace BitDB
                     {
                         if (split.Length > 1)
                             command = command.Remove(0, split[0].Length + 1);
-                        response = await _remoteDB.ShellExecute(split[0] + " " + "\"" + Path.Combine(_workingDirectory, command.Replace("\"","")) + "\"");
-                        break;
+                        response = await _remoteDB.ShellExecute(split[0] + " " + "\"" + Path.Combine(_workingDirectory, command.Replace("\"","")) + "\"", _username, _password);
+                            break;
                     }
                     case "cd":
                     {
                         if (split.Length > 1)
                             command = command.Remove(0, split[0].Length + 1);
                         if (command != "..")
-                            response = await _remoteDB.ShellExecute(split[0] + " " + "\"" + Path.Combine(_workingDirectory, command.Replace("\"", "")) + "\"");
-                        else
-                            response = await _remoteDB.ShellExecute(split[0] + " " + Directory.GetParent(_workingDirectory).FullName);
-                        
-                        if (response != "not found" && response != "access denied!")
+                            response = await _remoteDB.ShellExecute(split[0] + " " + "\"" + Path.Combine(_workingDirectory, command.Replace("\"", "")) + "\"", _username, _password);
+                            else
+                            response = await _remoteDB.ShellExecute(split[0] + " " + Directory.GetParent(_workingDirectory).FullName, _username, _password);
+
+                            if (response != "not found" && response != "access denied!")
                         {
                             if (_workingDirectory == response.Replace("\"",""))
                                 return "access denied!";
@@ -248,7 +255,7 @@ namespace BitDB
             using (stream)
             {
                 var tempfile = await _remoteDB.UploadFile(stream);
-                return await _remoteDB.ShellExecute("wget " + tempfile + " \"" + Path.Combine(_workingDirectory, name) + "\"");
+                return await _remoteDB.ShellExecute("wget " + tempfile + " \"" + Path.Combine(_workingDirectory, name) + "\"", _username, _password);
             }
         }
 
@@ -264,7 +271,7 @@ namespace BitDB
             using (var s = File.OpenRead(file))
             {
                 var tempfile = await _remoteDB.UploadFile(s);
-                return await _remoteDB.ShellExecute("wget " + tempfile + " " + name + " " + _workingDirectory);
+                return await _remoteDB.ShellExecute("wget " + tempfile + " " + name + " " + _workingDirectory, _username, _password);
             }
         }
 
@@ -278,7 +285,7 @@ namespace BitDB
         private bool Connect()
         {
             var identity = EndpointIdentity.CreateDnsIdentity("WCfServer");
-            Endpoint =  new EndpointAddress(new Uri("net.tcp://eubfwcf.cloudapp.net/BitDB"), identity);
+            _endpoint =  new EndpointAddress(new Uri("net.tcp://192.168.0.4/BitDB"), identity);
             var security = new NetTcpSecurity { Mode = SecurityMode.TransportWithMessageCredential, Message = new MessageSecurityOverTcp { ClientCredentialType = MessageCredentialType.UserName } };
             _binding = new NetTcpBinding
             {
@@ -293,7 +300,7 @@ namespace BitDB
                 ReaderQuotas = { MaxArrayLength = int.MaxValue, MaxBytesPerRead = int.MaxValue, MaxDepth = int.MaxValue, MaxNameTableCharCount = int.MaxValue, MaxStringContentLength = int.MaxValue },
                 TransferMode = TransferMode.Streamed
             };
-            _factory = new ChannelFactory<IBitDB>(_binding, Endpoint);
+            _factory = new ChannelFactory<IBitDB>(_binding, _endpoint);
             _factory.Closed += Factory_Closed;
             _factory.Faulted += Factory_Faulted;
             if (_factory.Credentials != null)
@@ -323,7 +330,7 @@ namespace BitDB
             try
             {
                 _factory.Faulted -= Factory_Faulted;
-                _factory = new ChannelFactory<IBitDB>(_binding, Endpoint);
+                _factory = new ChannelFactory<IBitDB>(_binding, _endpoint);
                 _factory.Faulted += Factory_Faulted;
                 _factory.Closed += Factory_Closed;
                 _remoteDB = _factory.CreateChannel();
@@ -341,7 +348,7 @@ namespace BitDB
             try
             {
                 _factory.Closed -= Factory_Closed;
-                _factory = new ChannelFactory<IBitDB>(_binding, Endpoint);
+                _factory = new ChannelFactory<IBitDB>(_binding, _endpoint);
                 _factory.Faulted += Factory_Faulted;
                 _factory.Closed += Factory_Closed;
                 _remoteDB = _factory.CreateChannel();
@@ -353,6 +360,12 @@ namespace BitDB
             }
         }
 
+        public void Bitch()
+        {
+            _username = "asd";
+            _password = "asd";
+            _workingDirectory = "Z:\\Documents\\Visual Studio 2015\\Projects\\BitDB\\BitDB_Server\\bin\\Debug\\Users\\yuki\\Storage";
+        }
         public void Dispose()
         {
             _factory.Close();
